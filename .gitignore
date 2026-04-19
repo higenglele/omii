@@ -1,0 +1,51 @@
+# Xcode
+.DS_Store
+*.swp
+*.xcuserstate
+xcuserdata/
+DerivedData/
+*.xccheckout
+*.xcscmblueprint
+*.xcodeproj/project.xcworkspace
+*.xcodeproj/xcuserdata
+
+# Build products
+build/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.swiftpm
+.build/
+Packages/
+*.xcodeproj
+
+# App Code Signing
+*.p12
+*.cer
+*.mobileprovision
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# System files
+.DS_Store
+Icon?
+Thumbs.db
+.AppleDouble
+.LSOverride
+
+# Temp files
+*.tmp
+*.temp
+.*.swp
+
+# Logs
+*.log
+logs/
+
+# Personal settings
+*.personal.xcconfig
