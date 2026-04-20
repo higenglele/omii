@@ -20,8 +20,8 @@ class FloatingPanelController {
 
         let prompts = SettingsManager.shared.customPrompts
         // Compact size: prompt list + custom input field
-        let listHeight = CGFloat(32 + prompts.count * 30 + 8 + 34)
-        let panelWidth: CGFloat = 240
+        let listHeight = CGFloat(32 + prompts.count * 30 + 8 + 54)
+        let panelWidth: CGFloat = 280
         let panelHeight = min(listHeight, 300)
 
         let aiService = AIService()

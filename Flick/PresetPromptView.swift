@@ -8,30 +8,49 @@ import SwiftUI
 struct PresetPromptView: View {
     let selectedText: String
     @ObservedObject var aiService: AIService
+    @ObservedObject private var settings = SettingsManager.shared
     let onClose: () -> Void
     let onResize: (NSSize) -> Void
 
     @State private var activePrompt: CustomPrompt?
     @State private var customInput: String = ""
     @State private var isCustomMode = false
-    private var prompts: [CustomPrompt] { SettingsManager.shared.customPrompts }
+    @State private var balanceText: String = "余额读取中..."
+    @State private var balanceTask: Task<Void, Never>?
+    @State private var lastBalanceRefreshAt: Date?
+    @State private var shouldRefreshBalanceAfterResponse = false
+    private var prompts: [CustomPrompt] { settings.customPrompts }
+    private var favoriteModels: [String] {
+        settings.favoriteModels.filter { !$0.isEmpty }
+    }
+
+    private func displayModelName(_ model: String) -> String {
+        let trimmed = model.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let slashIndex = trimmed.firstIndex(of: "/") else { return trimmed }
+        return String(trimmed[trimmed.index(after: slashIndex)...])
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Header
-            HStack {
-                Text(selectedText)
+            HStack(spacing: 8) {
+                Text(balanceText)
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
-                    .frame(maxWidth: .infinity, alignment: .leading)
 
-                Button(action: onClose) {
-                    Image(systemName: "xmark.circle.fill")
+                Spacer(minLength: 8)
+
+                modelSwitcher
+
+                Button(action: {
+                    settings.enableReasoning.toggle()
+                }) {
+                    Image(systemName: "brain")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(settings.enableReasoning ? .orange : .secondary.opacity(0.7))
                 }
                 .buttonStyle(.plain)
+                .help(settings.enableReasoning ? "推理已开启" : "推理已关闭")
             }
             .padding(.horizontal, 12)
             .padding(.top, 8)
@@ -51,6 +70,12 @@ struct PresetPromptView: View {
             RoundedRectangle(cornerRadius: 10)
                 .stroke(.quaternary, lineWidth: 0.5)
         )
+        .onAppear {
+            loadBalance(force: true)
+        }
+        .onDisappear {
+            balanceTask?.cancel()
+        }
     }
 
     // MARK: - Compact Prompt List
@@ -64,7 +89,8 @@ struct PresetPromptView: View {
         } else {
             aiService.sendRequest(systemPrompt: promptText, userContent: selectedText)
         }
-        onResize(NSSize(width: 340, height: 360))
+        shouldRefreshBalanceAfterResponse = true
+        onResize(NSSize(width: 380, height: 360))
     }
 
     private var promptList: some View {
@@ -108,10 +134,13 @@ struct PresetPromptView: View {
                 .disabled(customInput.isEmpty)
             }
             .padding(.horizontal, 12)
-            .padding(.vertical, 6)
+            .padding(.top, 6)
+                .padding(.bottom, 6)
         }
         .padding(.vertical, 4)
-        .onAppear { setupKeyboardMonitor() }
+        .onAppear {
+            setupKeyboardMonitor()
+        }
         .onDisappear { removeKeyboardMonitor() }
     }
 
@@ -120,7 +149,8 @@ struct PresetPromptView: View {
         isCustomMode = true
         let userMessage = customInput + "\n\n" + selectedText
         aiService.sendRequest(systemPrompt: "", userContent: userMessage)
-        onResize(NSSize(width: 340, height: 360))
+        shouldRefreshBalanceAfterResponse = true
+        onResize(NSSize(width: 380, height: 360))
     }
 
     @State private var keyMonitor: Any?
@@ -144,6 +174,47 @@ struct PresetPromptView: View {
         }
     }
 
+    private func loadBalance(force: Bool = false) {
+        let settings = SettingsManager.shared
+        guard !settings.apiKey.isEmpty else {
+            balanceText = "余额: 未配置 Key"
+            return
+        }
+
+        guard settings.apiBaseURL.localizedCaseInsensitiveContains("openrouter.ai") else {
+            balanceText = "余额: 非 OpenRouter"
+            return
+        }
+
+        if !force,
+           let lastBalanceRefreshAt,
+           Date().timeIntervalSince(lastBalanceRefreshAt) < 2 {
+            return
+        }
+
+        let baseURL = settings.apiBaseURL
+        let apiKey = settings.apiKey
+        balanceTask?.cancel()
+
+        balanceTask = Task {
+            do {
+                let balance = try await AIService.fetchBalance(baseURL: baseURL, apiKey: apiKey)
+                guard !Task.isCancelled else { return }
+                let formattedBalance = String(format: "%.2f", balance)
+                await MainActor.run {
+                    lastBalanceRefreshAt = Date()
+                    balanceText = "余额: $\(formattedBalance)"
+                }
+            } catch {
+                guard !Task.isCancelled else { return }
+                await MainActor.run {
+                    lastBalanceRefreshAt = Date()
+                    balanceText = "余额读取失败"
+                }
+            }
+        }
+    }
+
     // MARK: - Response View
 
     @State private var reasoningExpanded = false
@@ -155,8 +226,8 @@ struct PresetPromptView: View {
                     aiService.cancel()
                     activePrompt = nil
                     isCustomMode = false
-                    let listHeight = CGFloat(32 + prompts.count * 30 + 8 + 34)
-                    onResize(NSSize(width: 240, height: listHeight))
+                    let listHeight = CGFloat(32 + prompts.count * 30 + 8 + 54)
+                    onResize(NSSize(width: 280, height: listHeight))
                 }) {
                     HStack(spacing: 3) {
                         Image(systemName: "chevron.left")
@@ -223,6 +294,11 @@ struct PresetPromptView: View {
                 .onChange(of: aiService.responseText) {
                     withAnimation { proxy.scrollTo("bottom") }
                 }
+                .onChange(of: aiService.isLoading) {
+                    guard !aiService.isLoading, shouldRefreshBalanceAfterResponse else { return }
+                    shouldRefreshBalanceAfterResponse = false
+                    loadBalance(force: true)
+                }
             }
 
             if !aiService.responseText.isEmpty {
@@ -282,6 +358,41 @@ struct PresetPromptView: View {
     }
 
     // MARK: - Markdown Rendering
+
+    @ViewBuilder
+    private var modelSwitcher: some View {
+        if favoriteModels.isEmpty {
+            modelChip(settings.modelName)
+        } else {
+            Menu {
+                ForEach(favoriteModels, id: \.self) { model in
+                    Button(action: {
+                        settings.modelName = model
+                    }) {
+                        if settings.modelName == model {
+                            Label(displayModelName(model), systemImage: "checkmark")
+                        } else {
+                            Text(displayModelName(model))
+                        }
+                    }
+                }
+            } label: {
+                modelChip(settings.modelName)
+            }
+            .menuStyle(.borderlessButton)
+        }
+    }
+
+    private func modelChip(_ model: String) -> some View {
+        Text(displayModelName(model))
+        .font(.caption2)
+        .foregroundStyle(.secondary)
+        .padding(.horizontal, 6)
+        .padding(.vertical, 3)
+        .background(Color.secondary.opacity(0.08))
+        .clipShape(RoundedRectangle(cornerRadius: 6))
+        .frame(maxWidth: 110)
+    }
 
     @ViewBuilder
     private func markdownContent(_ text: String) -> some View {

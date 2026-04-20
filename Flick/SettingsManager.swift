@@ -47,6 +47,7 @@ class SettingsManager: ObservableObject {
         static let customPrompts = "customPrompts"
         static let hotkeyConfig = "hotkeyConfig"
         static let enableReasoning = "enableReasoning"
+        static let favoriteModels = "favoriteModels"
     }
 
     @Published var apiBaseURL: String {
@@ -73,6 +74,12 @@ class SettingsManager: ObservableObject {
         didSet { UserDefaults.standard.set(enableReasoning, forKey: Keys.enableReasoning) }
     }
 
+    @Published var favoriteModels: [String] {
+        didSet {
+            UserDefaults.standard.set(favoriteModels, forKey: Keys.favoriteModels)
+        }
+    }
+
     @Published var hotkeyConfig: HotkeyConfig {
         didSet {
             if let data = try? JSONEncoder().encode(hotkeyConfig) {
@@ -86,6 +93,7 @@ class SettingsManager: ObservableObject {
         self.modelName = UserDefaults.standard.string(forKey: Keys.modelName) ?? "gpt-4o"
         self.apiKey = KeychainHelper.read(key: Keys.apiKey) ?? ""
         self.enableReasoning = UserDefaults.standard.bool(forKey: Keys.enableReasoning)
+        self.favoriteModels = UserDefaults.standard.stringArray(forKey: Keys.favoriteModels) ?? []
 
         if let data = UserDefaults.standard.data(forKey: Keys.customPrompts),
            let prompts = try? JSONDecoder().decode([CustomPrompt].self, from: data) {
@@ -100,5 +108,45 @@ class SettingsManager: ObservableObject {
         } else {
             self.hotkeyConfig = HotkeyConfig.default
         }
+    }
+
+    func isFavoriteModel(_ model: String) -> Bool {
+        favoriteModels.contains(model)
+    }
+
+    func toggleFavoriteModel(_ model: String) {
+        if let index = favoriteModels.firstIndex(of: model) {
+            favoriteModels.remove(at: index)
+        } else {
+            favoriteModels.append(model)
+        }
+    }
+
+    func addFavoriteModel(_ model: String) {
+        guard !model.isEmpty, !favoriteModels.contains(model) else { return }
+        favoriteModels.append(model)
+    }
+
+    func removeFavoriteModel(_ model: String) {
+        favoriteModels.removeAll { $0 == model }
+    }
+
+    func moveFavoriteModels(visibleFavorites: [String], fromOffsets source: IndexSet, toOffset destination: Int) {
+        var reorderedVisibleFavorites = visibleFavorites
+        reorderedVisibleFavorites.move(fromOffsets: source, toOffset: destination)
+
+        let hiddenFavorites = favoriteModels.filter { !visibleFavorites.contains($0) }
+        favoriteModels = reorderedVisibleFavorites + hiddenFavorites
+    }
+
+    func moveFavoriteModels(fromOffsets source: IndexSet, toOffset destination: Int) {
+        favoriteModels.move(fromOffsets: source, toOffset: destination)
+    }
+
+    func orderedModels(from models: [String]) -> [String] {
+        let availableSet = Set(models)
+        let favorites = favoriteModels.filter { availableSet.contains($0) }
+        let others = models.filter { !favorites.contains($0) }
+        return favorites + others
     }
 }

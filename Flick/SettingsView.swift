@@ -11,7 +11,14 @@ struct SettingsView: View {
     @State private var isFetchingModels = false
     @State private var fetchError: String?
     @State private var editingPrompt: CustomPrompt?
-    @State private var fetchDebounceTask: Task<Void, Never>?
+    @State private var isModelLibraryPresented = false
+    @State private var fetchModelsTask: Task<Void, Never>?
+    @State private var fetchGeneration = 0
+    private var modelListHeight: CGFloat {
+        let rowHeight: CGFloat = 28
+        let padding: CGFloat = 8
+        return min(CGFloat(settings.favoriteModels.count) * rowHeight + padding, 180)
+    }
 
     var body: some View {
         TabView {
@@ -21,6 +28,9 @@ struct SettingsView: View {
                 .tabItem { Label("提示词", systemImage: "text.bubble") }
         }
         .frame(width: 520, height: 460)
+        .onDisappear {
+            fetchModelsTask?.cancel()
+        }
         .sheet(item: $editingPrompt) { prompt in
             PromptEditorSheet(
                 prompt: prompt,
@@ -37,6 +47,21 @@ struct SettingsView: View {
                 }
             )
         }
+        .sheet(isPresented: $isModelLibraryPresented) {
+            ModelLibrarySheet(
+                models: availableModels,
+                favoriteModels: settings.favoriteModels,
+                isLoading: isFetchingModels,
+                errorMessage: fetchError,
+                onRefresh: fetchModels,
+                onAdd: { model in
+                    settings.addFavoriteModel(model)
+                    if settings.modelName.isEmpty || !settings.favoriteModels.contains(settings.modelName) {
+                        settings.modelName = model
+                    }
+                }
+            )
+        }
     }
 
     // MARK: - General Tab
@@ -46,46 +71,58 @@ struct SettingsView: View {
             Section("API 配置") {
                 SecureField("API 密钥", text: $settings.apiKey)
                     .textFieldStyle(.roundedBorder)
-                    .onChange(of: settings.apiKey) { debouncedFetchModels() }
+                    .onChange(of: settings.apiKey) {
+                        invalidateModelLibrary()
+                    }
 
                 TextField("API 基础地址", text: $settings.apiBaseURL)
                     .textFieldStyle(.roundedBorder)
-                    .onSubmit { fetchModels() }
-                    .onChange(of: settings.apiBaseURL) { debouncedFetchModels() }
+                    .onChange(of: settings.apiBaseURL) {
+                        invalidateModelLibrary()
+                    }
             }
 
             Section("模型") {
-                if !availableModels.isEmpty {
-                    Picker("模型", selection: $settings.modelName) {
-                        ForEach(availableModels, id: \.self) { model in
-                            Text(model).tag(model)
-                        }
-                    }
-                } else {
-                    HStack {
-                        TextField("模型名称", text: $settings.modelName)
-                            .textFieldStyle(.roundedBorder)
+                HStack {
+                    Text("当前模型")
+                    Spacer()
+                    Text(settings.modelName.isEmpty ? "未选择" : displayModelName(settings.modelName))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
 
-                        Button(action: fetchModels) {
-                            if isFetchingModels {
-                                ProgressView()
-                                    .controlSize(.small)
-                            } else {
-                                Image(systemName: "arrow.clockwise")
-                            }
+                if !settings.favoriteModels.isEmpty {
+                    List {
+                        ForEach(settings.favoriteModels, id: \.self) { model in
+                            addedModelRow(for: model)
                         }
-                        .disabled(settings.apiKey.isEmpty || isFetchingModels)
+                        .onMove { source, destination in
+                            settings.moveFavoriteModels(fromOffsets: source, toOffset: destination)
+                        }
                     }
+                    .frame(height: modelListHeight)
+                    .environment(\.defaultMinListRowHeight, 28)
+                } else {
+                    Text("还没有添加模型。")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
 
                 if let error = fetchError {
                     Text(error).font(.caption).foregroundStyle(.red)
                 }
 
-                Toggle("启用推理模式", isOn: $settings.enableReasoning)
-                Text("开启后模型会进行深度思考，响应时间更长但结果更精准。需模型本身支持推理能力。")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                HStack {
+                    Button(action: openModelLibrary) {
+                        Label("添加模型", systemImage: "plus")
+                    }
+                    .disabled(settings.apiKey.isEmpty || settings.apiBaseURL.isEmpty)
+
+                    if isFetchingModels {
+                        ProgressView()
+                            .controlSize(.small)
+                    }
+                }
             }
 
             Section("快捷键") {
@@ -101,27 +138,8 @@ struct SettingsView: View {
                 }
             }
 
-            Section("权限") {
-                HStack {
-                    Text("需要辅助功能权限才能读取选中的文本。")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                    Button("打开系统设置") {
-                        NSWorkspace.shared.open(
-                            URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!
-                        )
-                    }
-                    .controlSize(.small)
-                }
-            }
         }
         .formStyle(.grouped)
-        .task {
-            if !settings.apiKey.isEmpty && !settings.apiBaseURL.isEmpty && availableModels.isEmpty {
-                fetchModels()
-            }
-        }
     }
 
     // MARK: - Prompts Tab
@@ -193,18 +211,11 @@ struct SettingsView: View {
 
     // MARK: - Actions
 
-    /// Debounce: wait 0.8s after the user stops typing before fetching
-    private func debouncedFetchModels() {
-        fetchDebounceTask?.cancel()
-        fetchDebounceTask = Task {
-            try? await Task.sleep(nanoseconds: 800_000_000)
-            guard !Task.isCancelled else { return }
-            await MainActor.run { fetchModels() }
-        }
-    }
-
     private func fetchModels() {
         guard !settings.apiKey.isEmpty, !settings.apiBaseURL.isEmpty else { return }
+        fetchModelsTask?.cancel()
+        fetchGeneration += 1
+        let currentGeneration = fetchGeneration
         isFetchingModels = true
         fetchError = nil
 
@@ -213,23 +224,27 @@ struct SettingsView: View {
         let normalizedURL = AIService.normalizedBaseURL(baseURL)
         print("[Flick] Fetching models from: \(normalizedURL)/models")
 
-        Task {
+        fetchModelsTask = Task {
             do {
                 let models = try await AIService.fetchModels(
                     baseURL: baseURL,
                     apiKey: apiKey
                 )
+                guard !Task.isCancelled else { return }
                 print("[Flick] Fetched \(models.count) models")
                 await MainActor.run {
-                    availableModels = models
+                    guard currentGeneration == fetchGeneration else { return }
+                    availableModels = settings.orderedModels(from: models)
                     isFetchingModels = false
-                    if !models.isEmpty && !models.contains(settings.modelName) {
-                        settings.modelName = models.first ?? settings.modelName
+                    if settings.modelName.isEmpty, let firstFavorite = settings.favoriteModels.first {
+                        settings.modelName = firstFavorite
                     }
                 }
             } catch {
+                guard !Task.isCancelled else { return }
                 print("[Flick] Fetch models error: \(error)")
                 await MainActor.run {
+                    guard currentGeneration == fetchGeneration else { return }
                     fetchError = error.localizedDescription
                     isFetchingModels = false
                 }
@@ -237,6 +252,150 @@ struct SettingsView: View {
         }
     }
 
+    private func openModelLibrary() {
+        isModelLibraryPresented = true
+        fetchModels()
+    }
+
+    private func invalidateModelLibrary() {
+        availableModels = []
+        fetchError = nil
+        fetchModelsTask?.cancel()
+        isFetchingModels = false
+    }
+
+    private func displayModelName(_ model: String) -> String {
+        let trimmed = model.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let slashIndex = trimmed.firstIndex(of: "/") else { return trimmed }
+        return String(trimmed[trimmed.index(after: slashIndex)...])
+    }
+
+    @ViewBuilder
+    private func addedModelRow(for model: String) -> some View {
+        HStack(spacing: 10) {
+            Text(displayModelName(model))
+                .lineLimit(1)
+
+            Spacer()
+
+            if settings.modelName == model {
+                Image(systemName: "star.fill")
+                    .foregroundStyle(.yellow)
+            }
+
+            Button(action: {
+                settings.removeFavoriteModel(model)
+                if settings.modelName == model {
+                    settings.modelName = settings.favoriteModels.first ?? ""
+                }
+            }) {
+                Image(systemName: "minus.circle")
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            settings.modelName = model
+        }
+    }
+}
+
+struct ModelLibrarySheet: View {
+    let models: [String]
+    let favoriteModels: [String]
+    let isLoading: Bool
+    let errorMessage: String?
+    let onRefresh: () -> Void
+    let onAdd: (String) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var searchText = ""
+
+    private var filteredModels: [String] {
+        let normalizedQuery = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedQuery.isEmpty else { return models }
+        return models.filter {
+            $0.localizedCaseInsensitiveContains(normalizedQuery) ||
+            displayModelName($0).localizedCaseInsensitiveContains(normalizedQuery)
+        }
+    }
+
+    private func displayModelName(_ model: String) -> String {
+        let trimmed = model.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let slashIndex = trimmed.firstIndex(of: "/") else { return trimmed }
+        return String(trimmed[trimmed.index(after: slashIndex)...])
+    }
+
+    var body: some View {
+        VStack(spacing: 12) {
+            HStack {
+                Text("添加模型")
+                    .font(.headline)
+                Spacer()
+                Button("关闭") {
+                    dismiss()
+                }
+            }
+
+            TextField("搜索模型", text: $searchText)
+                .textFieldStyle(.roundedBorder)
+
+            if let errorMessage {
+                Text(errorMessage)
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+
+            if isLoading && models.isEmpty {
+                VStack(spacing: 10) {
+                    ProgressView()
+                    Text("正在获取模型列表...")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                List(filteredModels, id: \.self) { model in
+                    HStack(spacing: 10) {
+                        Text(displayModelName(model))
+                            .lineLimit(1)
+
+                        Spacer()
+
+                        if favoriteModels.contains(model) {
+                            Label("已添加", systemImage: "checkmark.circle.fill")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        } else {
+                            Button("添加") {
+                                onAdd(model)
+                            }
+                            .buttonStyle(.bordered)
+                            .controlSize(.small)
+                        }
+                    }
+                    .padding(.vertical, 2)
+                }
+            }
+
+            HStack {
+                Button(action: onRefresh) {
+                    Label("刷新列表", systemImage: "arrow.clockwise")
+                }
+                .disabled(isLoading)
+
+                Spacer()
+
+                Text("\(models.count) 个模型")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .padding()
+        .frame(width: 520, height: 520)
+    }
 }
 
 // MARK: - Prompt Editor Sheet
@@ -302,5 +461,3 @@ struct PromptEditorSheet: View {
         .frame(width: 420, height: 380)
     }
 }
-
-

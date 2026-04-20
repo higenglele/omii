@@ -7,6 +7,9 @@ import AppKit
 import Carbon
 
 enum SelectionReader {
+    private static let pollInterval: TimeInterval = 0.02
+    private static let maxPollAttempts = 6
+
     /// Gets the currently selected text by simulating Cmd+C and reading the pasteboard.
     static func getSelectedText(completion: @escaping (String?) -> Void) {
         // Save current pasteboard content
@@ -17,8 +20,23 @@ enum SelectionReader {
         // Simulate Cmd+C
         simulateCopy()
 
-        // Wait briefly for the copy to complete
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+        pollPasteboard(
+            pasteboard: pasteboard,
+            previousContents: previousContents,
+            previousChangeCount: previousChangeCount,
+            attemptsRemaining: maxPollAttempts,
+            completion: completion
+        )
+    }
+
+    private static func pollPasteboard(
+        pasteboard: NSPasteboard,
+        previousContents: String?,
+        previousChangeCount: Int,
+        attemptsRemaining: Int,
+        completion: @escaping (String?) -> Void
+    ) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + pollInterval) {
             let newChangeCount = pasteboard.changeCount
             if newChangeCount != previousChangeCount,
                let text = pasteboard.string(forType: .string) {
@@ -28,6 +46,14 @@ enum SelectionReader {
                     pasteboard.setString(prev, forType: .string)
                 }
                 completion(text)
+            } else if attemptsRemaining > 1 {
+                pollPasteboard(
+                    pasteboard: pasteboard,
+                    previousContents: previousContents,
+                    previousChangeCount: previousChangeCount,
+                    attemptsRemaining: attemptsRemaining - 1,
+                    completion: completion
+                )
             } else {
                 completion(nil)
             }
