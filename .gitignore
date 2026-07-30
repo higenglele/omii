@@ -12,6 +12,7 @@ DerivedData/
 !Flick.xcodeproj/project.xcworkspace/xcshareddata/
 !Flick.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
 !Flick.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+Flick.xcodeproj/project.xcworkspace/contents.xcworkspacedata
 
 # Build products
 build/
