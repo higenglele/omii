@@ -98,12 +98,13 @@ struct PresetPromptView: View {
                 TextField("输入自定义指令…", text: $customInput)
                     .textFieldStyle(.plain)
                     .font(.callout)
+                    .foregroundStyle(Color(red: 232/255, green: 232/255, blue: 236/255))
                     .padding(.horizontal, 14)
                     .padding(.vertical, 8)
                     .background(Color(red: 44/255, green: 44/255, blue: 46/255))
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .clipShape(Capsule())
                     .overlay(
-                        RoundedRectangle(cornerRadius: 20)
+                        Capsule()
                             .stroke(Color(red: 58/255, green: 58/255, blue: 60/255), lineWidth: 0.5)
                     )
                     .onSubmit { sendCustomPrompt() }
@@ -111,7 +112,14 @@ struct PresetPromptView: View {
                 Button(action: sendCustomPrompt) {
                     Image(systemName: "paperplane.fill")
                         .font(.caption)
-                        .foregroundColor(customInput.isEmpty ? Color(red: 99/255, green: 99/255, blue: 102/255) : Color(red: 100/255, green: 210/255, blue: 255/255))
+                        .foregroundColor(Color(red: 100/255, green: 210/255, blue: 255/255))
+                        .frame(width: 32, height: 32)
+                        .background(
+                            customInput.isEmpty
+                                ? Color.clear
+                                : Color(red: 100/255, green: 210/255, blue: 255/255).opacity(0.15)
+                        )
+                        .clipShape(Capsule())
                 }
                 .buttonStyle(.plain)
                 .disabled(customInput.isEmpty)
