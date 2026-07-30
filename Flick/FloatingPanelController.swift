@@ -13,6 +13,7 @@ class KeyablePanel: NSPanel {
 
 class FloatingPanelController: NSObject, NSWindowDelegate {
     private var panel: NSPanel?
+    private var session: PanelSession?
     private var monitor: Any?
     private let preferencesStore: PanelPreferencesStore
     private let geometryService: PanelGeometryService
@@ -44,10 +45,10 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
 
         let listSize = promptListSize()
 
-        let aiService = AIService()
+        let session = PanelSession(selectedText: selectedText)
         let view = PresetPromptView(
             selectedText: selectedText,
-            aiService: aiService,
+            aiService: session.aiService,
             onClose: { [weak self] in self?.close() },
             onPhaseChange: { [weak self] phase in
                 self?.applyPhase(phase)
@@ -84,6 +85,8 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
         )
         panel.setFrameOrigin(panelOrigin)
         self.panel = panel
+        self.session = session
+        session.window = panel
         constrainPanelToVisibleScreen()
 
         panel.makeKeyAndOrderFront(nil)
@@ -98,7 +101,8 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
         moveCorrectionTask?.cancel()
         moveCorrectionTask = nil
         panel?.delegate = nil
-        panel?.orderOut(nil)
+        session?.close()
+        session = nil
         panel = nil
         if let monitor {
             NSEvent.removeMonitor(monitor)
@@ -165,6 +169,7 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
     private func applyPhase(_ phase: PanelPhase) {
         guard let panel else { return }
         currentPhase = phase
+        session?.transition(to: phase)
         configure(panel, for: phase)
 
         if phase == .promptList {
