@@ -90,6 +90,41 @@
 - README 更新为与当前实现一致的功能列表
 - 技术方案和需求文档已更新实现状态
 - 文件结构重组为按功能划分的目录
+- 项目根 README 缩略为指引，完整内容迁移到 `docs/README.md`
+- 生成可分发 DMG 安装包（Release 构建 + hdiutil 打包）
+
+### UI 重新設計（C3 圆润卡片风格）
+
+- 面板背景：`ultraThinMaterial` → 纯色 `#1c1c1e`，搭配深色高对比色调
+- 面板圆角：10 → 16 pt
+- 所有按钮统一为胶囊 pill 形状，`frame(height: 28)` 统一高度
+- 输入框改为胶囊形（cornerRadius: 20），深色底色 + 边框
+- 发送按钮从 SF Symbol 改为 👌 emoji，32×32 胶囊点按区域
+- 代码块圆角 7 → 12 pt，底色加深 `#0a0a0c`
+- 推理区域圆角 6 → 12 pt
+- 引用、分隔线、标题颜色适配深色主题
+
+### 布局调整
+
+- 提示词列表宽度：280 → 210 pt，SwiftUI 层加显式 `frame(width:)` 防止 NSHostingView 撑宽
+- 模型名称：提示词列表页居中；结果页移回左侧（返回按钮旁边），纯文字展示（无下拉、无底色）
+- 结果页顶部按钮布局：`[‹] [模型名] [Spacer] [复制全部] [📌]`
+- 复制全部按钮从底部 footer 移到右上角
+- 右上角移除提示词标题，仅保留图钉
+- 返回按钮改为纯图标（无文字）
+
+### 图标与 emoji
+
+- 默认提示词图标：SF Symbols → emoji（📖📝🌐✏️💡）
+- 设置页图标选择器：从固定 Picker 改为 TextField，支持系统 emoji 键盘
+- 菜单栏图标：sparkles → bolt.fill（⚡ 形状的 SF Symbol）
+- 修复 `lockFocus()/unlockFocus()` 渲染 emoji 在 macOS 26 上的启动崩溃
+
+### 其他
+
+- 浮窗右上角移除推理开关（🧠 按钮）
+- `.gitignore` 添加 `*.dmg` 规则
+- 全部 23 项测试通过
 
 ## v0.8 — 初始版本 (历史)
 

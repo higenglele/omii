@@ -17,14 +17,14 @@ Flick 是一个 macOS 菜单栏常驻的全局 AI 文本处理工具。用户在
 | 层 | 技术 |
 |---|---|
 | 语言 | Swift 5.0 |
-| UI 框架 | SwiftUI + AppKit 混合 |
+| UI 框架 | SwiftUI + AppKit 混合；深色高对比主题（`#1c1c1e`），圆润卡片设计 |
 | 窗口系统 | NSPanel (KeyablePanel) |
 | 网络 | URLSession + async/await |
 | 流式传输 | SSE (Server-Sent Events) via `URLSession.AsyncBytes` |
 | Markdown 解析 | swift-markdown 0.8.0 (swiftlang) |
 | 持久化 | UserDefaults + Keychain |
 | 并发 | Swift Concurrency (async/await, Task), Combine |
-| 测试 | XCTest |
+| 测试 | XCTest（23 项） |
 | 构建 | Xcode (File System Synchronized Groups) |
 | 最低部署 | macOS 26.0 |
 
@@ -73,7 +73,7 @@ FlickTests/          单元测试
 - `PanelSession` — 独立窗口会话，持有 AIService、固定状态、页面阶段
 - `PanelGeometryService` — 窗口尺寸和位置约束计算（最小 380×360，五倍上限，屏幕可见区域）
 - `PanelCascadePlacementService` — 新窗口自动错开排列算法
-- `PanelPinButton` — 固定/取消固定按钮
+- `PanelPinButton` — 固定/取消固定按钮（胶囊 pill 样式）
 - `PanelResizeCapability` — 窗口缩放能力切换
 - `PanelWindowLevelPolicy` — 固定/未固定窗口层级策略（`.floating` vs `.normal`）
 - `OutsideClickMonitor` — 全局鼠标事件监听，统一处理外部点击关闭
