@@ -20,6 +20,8 @@ build/
 .build/
 Packages/
 *.xcodeproj
+!Flick.xcodeproj/
+!Flick.xcodeproj/project.pbxproj
 
 # App Code Signing
 *.p12
