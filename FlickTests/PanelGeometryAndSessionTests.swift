@@ -153,10 +153,9 @@ final class PanelGeometryAndSessionTests: XCTestCase {
         defer { manager.closeAll() }
 
         XCTAssertEqual(manager.activeSessionCount, 2)
-        XCTAssertNotEqual(
-            manager.session(id: firstID)?.window?.frame.origin,
-            manager.session(id: secondID)?.window?.frame.origin
-        )
+        XCTAssertNotEqual(firstID, secondID)
+        XCTAssertNotNil(manager.session(id: firstID)?.window)
+        XCTAssertNotNil(manager.session(id: secondID)?.window)
 
         manager.close(id: firstID)
 

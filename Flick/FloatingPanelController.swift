@@ -61,13 +61,8 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
     func show(at point: NSPoint, preferredOrigin: NSPoint? = nil) {
         let listSize = promptListSize()
 
-        let view = PresetPromptView(
-            selectedText: session.selectedText,
-            aiService: session.aiService,
-            pinState: Binding(
-                get: { [session] in session.pinState },
-                set: { [session] in session.pinState = $0 }
-            ),
+        let view = PanelSessionRootView(
+            session: session,
             onClose: { [weak self] in self?.close() },
             onPhaseChange: { [session] phase in
                 session.transition(to: phase)
@@ -185,7 +180,13 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
         configure(panel, for: phase)
 
         if phase == .promptList {
-            resizePanel(panel, to: promptListSize())
+            let listSize = promptListSize()
+            let sizeAlreadyMatches =
+                abs(panel.frame.width - listSize.width) < 0.5
+                && abs(panel.frame.height - listSize.height) < 0.5
+            if !sizeAlreadyMatches {
+                resizePanel(panel, to: listSize)
+            }
         }
     }
 
@@ -270,5 +271,21 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
     deinit {
         NotificationCenter.default.removeObserver(self)
         moveCorrectionTask?.cancel()
+    }
+}
+
+private struct PanelSessionRootView: View {
+    @ObservedObject var session: PanelSession
+    let onClose: () -> Void
+    let onPhaseChange: (PanelPhase) -> Void
+
+    var body: some View {
+        PresetPromptView(
+            selectedText: session.selectedText,
+            aiService: session.aiService,
+            pinState: $session.pinState,
+            onClose: onClose,
+            onPhaseChange: onPhaseChange
+        )
     }
 }
