@@ -10,7 +10,7 @@ struct PresetPromptView: View {
     @ObservedObject var aiService: AIService
     @ObservedObject private var settings = SettingsManager.shared
     let onClose: () -> Void
-    let onResize: (NSSize) -> Void
+    let onPhaseChange: (PanelPhase) -> Void
 
     @State private var activePrompt: CustomPrompt?
     @State private var customInput: String = ""
@@ -86,6 +86,7 @@ struct PresetPromptView: View {
     private func triggerPrompt(_ prompt: CustomPrompt) {
         prepareForResponse()
         activePrompt = prompt
+        onPhaseChange(.response)
         let promptText = prompt.systemPrompt
         if promptText.contains("{{text}}") {
             let userMessage = promptText.replacingOccurrences(of: "{{text}}", with: selectedText)
@@ -94,7 +95,6 @@ struct PresetPromptView: View {
             aiService.sendRequest(systemPrompt: promptText, userContent: selectedText)
         }
         shouldRefreshBalanceAfterResponse = true
-        onResize(NSSize(width: 380, height: 360))
     }
 
     private var promptList: some View {
@@ -152,10 +152,10 @@ struct PresetPromptView: View {
         guard !customInput.isEmpty else { return }
         prepareForResponse()
         isCustomMode = true
+        onPhaseChange(.response)
         let userMessage = customInput + "\n\n" + selectedText
         aiService.sendRequest(systemPrompt: "", userContent: userMessage)
         shouldRefreshBalanceAfterResponse = true
-        onResize(NSSize(width: 380, height: 360))
     }
 
     @State private var keyMonitor: Any?
@@ -238,8 +238,7 @@ struct PresetPromptView: View {
                     prepareForResponse()
                     activePrompt = nil
                     isCustomMode = false
-                    let listHeight = CGFloat(32 + prompts.count * 30 + 8 + 54)
-                    onResize(NSSize(width: 280, height: listHeight))
+                    onPhaseChange(.promptList)
                 }) {
                     HStack(spacing: 3) {
                         Image(systemName: "chevron.left")
