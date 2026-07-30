@@ -52,7 +52,7 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
         )
     }
 
-    func show(at point: NSPoint) {
+    func show(at point: NSPoint, preferredOrigin: NSPoint? = nil) {
         let listSize = promptListSize()
 
         let view = PresetPromptView(
@@ -91,7 +91,7 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
         configure(panel, for: .promptList)
 
         // Position near mouse cursor
-        let panelOrigin = NSPoint(
+        let panelOrigin = preferredOrigin ?? NSPoint(
             x: point.x - listSize.width / 2,
             y: point.y - listSize.height - 10
         )

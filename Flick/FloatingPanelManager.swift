@@ -9,6 +9,14 @@ import AppKit
 final class FloatingPanelManager {
     private var controllers: [UUID: FloatingPanelController] = [:]
     private let outsideClickMonitor = OutsideClickMonitor()
+    private let cascadePlacement: PanelCascadePlacementService
+
+    init(
+        cascadePlacement: PanelCascadePlacementService =
+            PanelCascadePlacementService()
+    ) {
+        self.cascadePlacement = cascadePlacement
+    }
 
     var activeSessionCount: Int {
         controllers.count
@@ -26,7 +34,25 @@ final class FloatingPanelManager {
         )
 
         controllers[session.id] = controller
-        controller.show(at: point)
+        let listSize = controller.promptListSize()
+        let requestedFrame = NSRect(
+            x: point.x - listSize.width / 2,
+            y: point.y - listSize.height - 10,
+            width: listSize.width,
+            height: listSize.height
+        )
+        let visibleFrame = screen(containing: point)?.visibleFrame
+            ?? NSScreen.main?.visibleFrame
+            ?? requestedFrame
+        let existingFrames = controllers.values.compactMap {
+            $0.session.window?.frame
+        }
+        let placement = cascadePlacement.nextFrame(
+            requestedFrame: requestedFrame,
+            existingFrames: existingFrames,
+            visibleFrame: visibleFrame
+        )
+        controller.show(at: point, preferredOrigin: placement.origin)
         return session.id
     }
 
@@ -61,5 +87,9 @@ final class FloatingPanelManager {
         if controllers.isEmpty {
             outsideClickMonitor.stop()
         }
+    }
+
+    private func screen(containing point: NSPoint) -> NSScreen? {
+        NSScreen.screens.first { $0.frame.contains(point) }
     }
 }
