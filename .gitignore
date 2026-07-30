@@ -50,8 +50,8 @@ Thumbs.db
 *.temp
 .*.swp
 
-# Logs
-*.log
+# Release packages
+*.dmg
 logs/
 
 # Personal settings
