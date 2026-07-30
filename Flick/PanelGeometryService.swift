@@ -66,6 +66,23 @@ struct PanelGeometryService {
         )
     }
 
+    func constrainedFrame(
+        _ requestedFrame: CGRect,
+        toBestVisibleFrame visibleFrames: [CGRect]
+    ) -> CGRect {
+        guard let screenIndex = primaryScreenIndex(
+            for: requestedFrame,
+            visibleFrames: visibleFrames
+        ) else {
+            return requestedFrame
+        }
+
+        return constrainedFrame(
+            requestedFrame,
+            to: visibleFrames[screenIndex]
+        )
+    }
+
     func primaryScreenIndex(
         for frame: CGRect,
         visibleFrames: [CGRect]

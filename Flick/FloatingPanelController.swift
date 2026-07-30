@@ -18,6 +18,8 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
     private let geometryService: PanelGeometryService
     private let sizePersistence: PanelSizePersistenceCoordinator
     private var currentPhase: PanelPhase = .promptList
+    private var moveCorrectionTask: Task<Void, Never>?
+    private var isCorrectingGeometry = false
 
     init(
         preferencesStore: PanelPreferencesStore = PanelPreferencesStore(),
@@ -29,6 +31,12 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
             preferencesStore: preferencesStore
         )
         super.init()
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(screenParametersDidChange),
+            name: NSApplication.didChangeScreenParametersNotification,
+            object: nil
+        )
     }
 
     func show(at point: NSPoint, with selectedText: String) {
@@ -75,10 +83,11 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
             y: point.y - listSize.height - 10
         )
         panel.setFrameOrigin(panelOrigin)
+        self.panel = panel
+        constrainPanelToVisibleScreen()
 
         panel.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
-        self.panel = panel
 
         monitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
             self?.close()
@@ -86,6 +95,8 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
     }
 
     func close() {
+        moveCorrectionTask?.cancel()
+        moveCorrectionTask = nil
         panel?.delegate = nil
         panel?.orderOut(nil)
         panel = nil
@@ -190,9 +201,52 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
             return
         }
 
+        constrainPanelToVisibleScreen()
         sizePersistence.recordUserResize(
             resizedPanel.frame.size,
             phase: currentPhase
         )
+    }
+
+    func windowDidMove(_ notification: Notification) {
+        guard !isCorrectingGeometry,
+              let movedPanel = notification.object as? NSPanel,
+              movedPanel === panel
+        else {
+            return
+        }
+
+        moveCorrectionTask?.cancel()
+        moveCorrectionTask = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(100))
+            guard !Task.isCancelled else { return }
+            self?.constrainPanelToVisibleScreen()
+        }
+    }
+
+    @objc
+    private func screenParametersDidChange() {
+        constrainPanelToVisibleScreen()
+    }
+
+    private func constrainPanelToVisibleScreen() {
+        guard let panel, !isCorrectingGeometry else { return }
+        let visibleFrames = NSScreen.screens.map(\.visibleFrame)
+        guard !visibleFrames.isEmpty else { return }
+
+        let correctedFrame = geometryService.constrainedFrame(
+            panel.frame,
+            toBestVisibleFrame: visibleFrames
+        )
+        guard correctedFrame != panel.frame else { return }
+
+        isCorrectingGeometry = true
+        panel.setFrame(correctedFrame, display: true)
+        isCorrectingGeometry = false
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+        moveCorrectionTask?.cancel()
     }
 }
