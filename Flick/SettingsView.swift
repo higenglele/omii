@@ -14,6 +14,7 @@ struct SettingsView: View {
     @State private var isModelLibraryPresented = false
     @State private var fetchModelsTask: Task<Void, Never>?
     @State private var fetchGeneration = 0
+    @StateObject private var accountViewModel = OpenRouterAccountViewModel()
     private var modelListHeight: CGFloat {
         let rowHeight: CGFloat = 28
         let padding: CGFloat = 8
@@ -30,6 +31,7 @@ struct SettingsView: View {
         .frame(width: 520, height: 460)
         .onDisappear {
             fetchModelsTask?.cancel()
+            accountViewModel.cancelRefresh()
         }
         .sheet(item: $editingPrompt) { prompt in
             PromptEditorSheet(
@@ -80,6 +82,28 @@ struct SettingsView: View {
                     .onChange(of: settings.apiBaseURL) {
                         invalidateModelLibrary()
                     }
+
+                if OpenRouterEndpointPolicy.isOpenRouter(
+                    settings.apiBaseURL
+                ) {
+                    OpenRouterAccountSection(
+                        state: accountViewModel.state,
+                        apiKeyIsEmpty: settings.apiKey.isEmpty
+                    )
+                    .task(id: accountConfigurationID) {
+                        accountViewModel.cancelRefresh()
+                        if !settings.apiKey.isEmpty {
+                            try? await Task.sleep(
+                                for: .milliseconds(250)
+                            )
+                            guard !Task.isCancelled else { return }
+                        }
+                        accountViewModel.refresh(
+                            baseURL: settings.apiBaseURL,
+                            apiKey: settings.apiKey
+                        )
+                    }
+                }
             }
 
             Section("模型") {
@@ -268,6 +292,13 @@ struct SettingsView: View {
         let trimmed = model.trimmingCharacters(in: .whitespacesAndNewlines)
         guard let slashIndex = trimmed.firstIndex(of: "/") else { return trimmed }
         return String(trimmed[trimmed.index(after: slashIndex)...])
+    }
+
+    private var accountConfigurationID: String {
+        BalanceCacheStore.scope(
+            baseURL: settings.apiBaseURL,
+            apiKey: settings.apiKey
+        )
     }
 
     @ViewBuilder
