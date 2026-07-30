@@ -10,11 +10,6 @@
 		7A100001301B01DC00A9A9CF /* Markdown in Frameworks */ = {isa = PBXBuildFile; productRef = 7A100002301B01DC00A9A9CF /* Markdown */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXFileReference section */
-		2D70CB08301B01DC00A9A9CF /* Flick.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Flick.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		A1000001301B01DC00A9A9CF /* FlickTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FlickTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-/* End PBXFileReference section */
-
 /* Begin PBXContainerItemProxy section */
 		A1000008301B01DC00A9A9CF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -24,6 +19,11 @@
 			remoteInfo = Flick;
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		2D70CB08301B01DC00A9A9CF /* Flick.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Flick.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A1000001301B01DC00A9A9CF /* FlickTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FlickTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		2D70CB0A301B01DC00A9A9CF /* Flick */ = {
