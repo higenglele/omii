@@ -32,18 +32,15 @@ struct PresetPromptView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: 8) {
-                modelSwitcher
-
-                Spacer(minLength: 8)
-            }
-            .padding(.horizontal, 12)
-            .padding(.top, 8)
-            .padding(.bottom, 6)
-
-            Divider()
-
             if activePrompt == nil && !isCustomMode {
+                HStack(spacing: 8) {
+                    modelSwitcher
+                    Spacer(minLength: 8)
+                }
+                .padding(.horizontal, 12)
+                .padding(.top, 8)
+                .padding(.bottom, 6)
+                Divider()
                 promptList
             } else {
                 responseView
@@ -166,6 +163,7 @@ struct PresetPromptView: View {
     private var responseView: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
+                // Left: Back button
                 Button(action: {
                     aiService.cancel()
                     prepareForResponse()
@@ -180,20 +178,30 @@ struct PresetPromptView: View {
                     .font(.caption)
                 }
                 .buttonStyle(.plain)
+                .frame(width: 50, alignment: .leading)
 
                 Spacer()
 
-                if let prompt = activePrompt {
-                    Label(prompt.title, systemImage: prompt.icon)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                } else if isCustomMode {
-                    Label("自定义", systemImage: "text.cursor")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
+                // Center: Model name
+                modelSwitcher
 
-                PanelPinButton(pinState: $pinState)
+                Spacer()
+
+                // Right: Prompt title + Pin button
+                HStack(spacing: 8) {
+                    if let prompt = activePrompt {
+                        Label(prompt.title, systemImage: prompt.icon)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    } else if isCustomMode {
+                        Label("自定义", systemImage: "text.cursor")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    PanelPinButton(pinState: $pinState)
+                }
+                .frame(width: 50, alignment: .trailing)
             }
             .padding(.horizontal, 12)
             .padding(.top, 8)
