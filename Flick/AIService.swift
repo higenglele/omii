@@ -15,6 +15,14 @@ class AIService: ObservableObject {
 
     private var currentTask: Task<Void, Never>?
 
+    /// The URL session used for network requests.
+    /// Can be overridden for testing with mock responses.
+    var urlSession: URLSession
+
+    init(urlSession: URLSession = AIService.defaultSession) {
+        self.urlSession = urlSession
+    }
+
     /// Normalizes the base URL to ensure it ends with /v1
     static func normalizedBaseURL(_ baseURL: String) -> String {
         var url = baseURL.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
@@ -68,11 +76,9 @@ class AIService: ObservableObject {
         isReasoning = false
     }
 
-    /// A URLSession that bypasses system proxy to avoid auth header stripping
-    private static let directSession: URLSession = {
-        let config = URLSessionConfiguration.default
-        config.connectionProxyDictionary = [:]
-        return URLSession(configuration: config)
+    /// A URLSession using system default proxy settings.
+    private static let defaultSession: URLSession = {
+        URLSession(configuration: .default)
     }()
 
     private func streamChat(
@@ -111,8 +117,9 @@ class AIService: ObservableObject {
         }
 
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        request.timeoutInterval = 30
 
-        let (bytes, response) = try await Self.directSession.bytes(for: request)
+        let (bytes, response) = try await urlSession.bytes(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse else {
             throw AIError.invalidResponse
@@ -181,7 +188,7 @@ class AIService: ObservableObject {
         request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         request.timeoutInterval = 10
 
-        let (data, response) = try await directSession.data(for: request)
+        let (data, response) = try await defaultSession.data(for: request)
 
         if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
             if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
