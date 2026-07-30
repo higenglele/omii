@@ -36,16 +36,6 @@ struct PresetPromptView: View {
                 modelSwitcher
 
                 Spacer(minLength: 8)
-
-                Button(action: {
-                    settings.enableReasoning.toggle()
-                }) {
-                    Image(systemName: "brain")
-                        .font(.caption)
-                        .foregroundStyle(settings.enableReasoning ? .orange : .secondary.opacity(0.7))
-                }
-                .buttonStyle(.plain)
-                .help(settings.enableReasoning ? "推理已开启" : "推理已关闭")
             }
             .padding(.horizontal, 12)
             .padding(.top, 8)
