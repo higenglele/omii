@@ -121,7 +121,7 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
     func promptListSize() -> NSSize {
         let promptCount = SettingsManager.shared.customPrompts.count
         let listHeight = CGFloat(32 + promptCount * 30 + 8 + 54)
-        return NSSize(width: 200, height: min(listHeight, 300))
+        return NSSize(width: 186, height: min(listHeight, 300))
     }
 
     func configure(_ panel: NSPanel, for phase: PanelPhase) {

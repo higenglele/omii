@@ -33,15 +33,19 @@ struct PresetPromptView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             if activePrompt == nil && !isCustomMode {
-                HStack(spacing: 8) {
-                    Spacer()
-                    modelSwitcher
-                    Spacer()
+                VStack(spacing: 0) {
+                    HStack(spacing: 8) {
+                        Spacer()
+                        modelSwitcher
+                        Spacer()
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 12)
+                    .padding(.bottom, 4)
+
+                    promptList
                 }
-                .padding(.horizontal, 16)
-                .padding(.top, 12)
-                .padding(.bottom, 4)
-                promptList
+                .frame(width: 186)
             } else {
                 responseView
             }
