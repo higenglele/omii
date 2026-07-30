@@ -6,6 +6,7 @@
 import Foundation
 import Combine
 import Carbon
+import SwiftUI
 
 struct CustomPrompt: Identifiable, Codable, Equatable {
     var id: UUID
