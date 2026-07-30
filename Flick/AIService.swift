@@ -111,10 +111,9 @@ class AIService: ObservableObject {
         if enableReasoning {
             body["include_reasoning"] = true
             body["reasoning"] = ["effort": "medium"]
-        } else {
-            // Explicitly disable reasoning for models that default to thinking
-            body["include_reasoning"] = false
         }
+        // When reasoning is off, omit all reasoning-related parameters.
+        // Setting them to false can be misinterpreted by some models/providers.
 
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
         request.timeoutInterval = 30
