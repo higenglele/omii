@@ -37,20 +37,19 @@ struct PresetPromptView: View {
                     modelSwitcher
                     Spacer(minLength: 8)
                 }
-                .padding(.horizontal, 12)
-                .padding(.top, 8)
-                .padding(.bottom, 6)
-                Divider()
+                .padding(.horizontal, 16)
+                .padding(.top, 12)
+                .padding(.bottom, 4)
                 promptList
             } else {
                 responseView
             }
         }
-        .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .background(Color(red: 28/255, green: 28/255, blue: 30/255))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(
-            RoundedRectangle(cornerRadius: 10)
-                .stroke(.quaternary, lineWidth: 0.5)
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color(red: 58/255, green: 58/255, blue: 60/255), lineWidth: 0.5)
         )
     }
 
@@ -85,8 +84,8 @@ struct PresetPromptView: View {
                             .font(.callout)
                         Spacer()
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 7)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 11)
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
@@ -95,23 +94,31 @@ struct PresetPromptView: View {
             Divider()
                 .padding(.vertical, 2)
 
-            HStack(spacing: 6) {
-                TextField("输入自定义 Prompt...", text: $customInput)
+            HStack(spacing: 8) {
+                TextField("输入自定义指令…", text: $customInput)
                     .textFieldStyle(.plain)
                     .font(.callout)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(Color(red: 44/255, green: 44/255, blue: 46/255))
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(Color(red: 58/255, green: 58/255, blue: 60/255), lineWidth: 0.5)
+                    )
                     .onSubmit { sendCustomPrompt() }
 
                 Button(action: sendCustomPrompt) {
                     Image(systemName: "paperplane.fill")
                         .font(.caption)
-                        .foregroundColor(customInput.isEmpty ? .gray : .accentColor)
+                        .foregroundColor(customInput.isEmpty ? Color(red: 99/255, green: 99/255, blue: 102/255) : Color(red: 100/255, green: 210/255, blue: 255/255))
                 }
                 .buttonStyle(.plain)
                 .disabled(customInput.isEmpty)
             }
-            .padding(.horizontal, 12)
-            .padding(.top, 6)
-                .padding(.bottom, 6)
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+            .padding(.bottom, 10)
         }
         .padding(.vertical, 4)
         .onAppear {
@@ -163,7 +170,7 @@ struct PresetPromptView: View {
     private var responseView: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
-                // Left: Back button
+                // Left: Back button (icon only)
                 Button(action: {
                     aiService.cancel()
                     prepareForResponse()
@@ -171,14 +178,14 @@ struct PresetPromptView: View {
                     isCustomMode = false
                     onPhaseChange(.promptList)
                 }) {
-                    HStack(spacing: 3) {
-                        Image(systemName: "chevron.left")
-                        Text("返回")
-                    }
-                    .font(.caption)
+                    Image(systemName: "chevron.left")
+                        .font(.caption)
+                        .foregroundStyle(Color(red: 152/255, green: 152/255, blue: 157/255))
+                        .padding(6)
+                        .background(Color(red: 44/255, green: 44/255, blue: 46/255))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
                 .buttonStyle(.plain)
-                .frame(width: 50, alignment: .leading)
 
                 Spacer()
 
@@ -187,24 +194,11 @@ struct PresetPromptView: View {
 
                 Spacer()
 
-                // Right: Prompt title + Pin button
-                HStack(spacing: 8) {
-                    if let prompt = activePrompt {
-                        Label(prompt.title, systemImage: prompt.icon)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    } else if isCustomMode {
-                        Label("自定义", systemImage: "text.cursor")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    PanelPinButton(pinState: $pinState)
-                }
-                .frame(width: 50, alignment: .trailing)
+                // Right: Pin button only
+                PanelPinButton(pinState: $pinState)
             }
-            .padding(.horizontal, 12)
-            .padding(.top, 8)
+            .padding(.horizontal, 16)
+            .padding(.top, 12)
 
             ScrollViewReader { proxy in
                 ScrollView {
@@ -300,14 +294,22 @@ struct PresetPromptView: View {
                     Button(action: {
                         ResponseCopyAction.copy(aiService.responseText)
                     }) {
-                        Label("复制", systemImage: "doc.on.doc")
+                        Label("复制全部", systemImage: "doc.on.doc")
                             .font(.caption)
+                            .foregroundStyle(Color(red: 152/255, green: 152/255, blue: 157/255))
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 6)
+                            .background(Color(red: 44/255, green: 44/255, blue: 46/255))
+                            .clipShape(Capsule())
+                            .overlay(
+                                Capsule()
+                                    .stroke(Color(red: 58/255, green: 58/255, blue: 60/255), lineWidth: 0.5)
+                            )
                     }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
+                    .buttonStyle(.plain)
                 }
-                .padding(.horizontal, 12)
-                .padding(.bottom, 8)
+                .padding(.horizontal, 16)
+                .padding(.bottom, 10)
             }
         }
     }
@@ -344,9 +346,9 @@ struct PresetPromptView: View {
                 }
             }
         }
-        .padding(8)
-        .background(Color.orange.opacity(0.06))
-        .clipShape(RoundedRectangle(cornerRadius: 6))
+        .padding(10)
+        .background(Color(red: 255/255, green: 159/255, blue: 10/255).opacity(0.06))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
     // MARK: - Markdown Rendering
@@ -378,12 +380,12 @@ struct PresetPromptView: View {
     private func modelChip(_ model: String) -> some View {
         Text(displayModelName(model))
         .font(.caption2)
-        .foregroundStyle(.secondary)
-        .padding(.horizontal, 6)
-        .padding(.vertical, 3)
-        .background(Color.secondary.opacity(0.08))
-        .clipShape(RoundedRectangle(cornerRadius: 6))
-        .frame(maxWidth: 110)
+        .foregroundStyle(Color(red: 152/255, green: 152/255, blue: 157/255))
+        .padding(.horizontal, 12)
+        .padding(.vertical, 4)
+        .background(Color(red: 255/255, green: 255/255, blue: 255/255).opacity(0.06))
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .frame(maxWidth: 140)
     }
 
 }

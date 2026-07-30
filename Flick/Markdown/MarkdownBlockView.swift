@@ -31,6 +31,7 @@ enum MarkdownBlockRenderer {
             return AnyView(
                 SwiftUI.Text(MarkdownInlineRenderer.renderChildren(of: heading))
                     .font(headingFont(for: heading.level))
+                    .foregroundStyle(headingColor(for: heading.level))
                     .textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)
             )
@@ -40,6 +41,7 @@ enum MarkdownBlockRenderer {
             return AnyView(
                 SwiftUI.Text(MarkdownInlineRenderer.renderChildren(of: paragraph))
                     .font(.callout)
+                    .foregroundStyle(Color(red: 199/255, green: 199/255, blue: 204/255))
                     .textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)
             )
@@ -62,12 +64,12 @@ enum MarkdownBlockRenderer {
         if let blockQuote = markup as? BlockQuote {
             return AnyView(
                 HStack(alignment: .top, spacing: 8) {
-                    RoundedRectangle(cornerRadius: 1)
-                        .fill(Color.secondary.opacity(0.45))
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(Color(red: 255/255, green: 255/255, blue: 255/255).opacity(0.1))
                         .frame(width: 3)
 
                     childBlocks(of: blockQuote)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color(red: 142/255, green: 142/255, blue: 147/255))
                 }
                 .padding(.vertical, 2)
             )
@@ -91,7 +93,11 @@ enum MarkdownBlockRenderer {
         }
 
         if markup is ThematicBreak {
-            return AnyView(Divider().padding(.vertical, 4))
+            return AnyView(
+                Divider()
+                    .background(Color(red: 255/255, green: 255/255, blue: 255/255).opacity(0.05))
+                    .padding(.vertical, 4)
+            )
         }
 
         if markup.childCount > 0 {
@@ -141,6 +147,17 @@ enum MarkdownBlockRenderer {
             return .headline
         default:
             return .subheadline.bold()
+        }
+    }
+
+    private static func headingColor(for level: Int) -> Color {
+        switch level {
+        case 1:
+            return Color(red: 245/255, green: 245/255, blue: 247/255)
+        case 2:
+            return Color(red: 232/255, green: 232/255, blue: 236/255)
+        default:
+            return Color(red: 232/255, green: 232/255, blue: 236/255)
         }
     }
 
