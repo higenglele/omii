@@ -64,6 +64,15 @@ enum MarkdownBlockRenderer {
             )
         }
 
+        if let codeBlock = markup as? CodeBlock {
+            return AnyView(
+                MarkdownCodeBlockView(
+                    code: codeBlock.code,
+                    language: codeBlock.language
+                )
+            )
+        }
+
         if markup is ThematicBreak {
             return AnyView(Divider().padding(.vertical, 4))
         }
