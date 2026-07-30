@@ -45,7 +45,7 @@ struct PresetPromptView: View {
 
                     promptList
                 }
-                .frame(width: 186)
+                .frame(width: 210)
             } else {
                 responseView
             }

@@ -23,15 +23,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private func setupStatusBar() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         if let button = statusItem.button {
-            let attributes: [NSAttributedString.Key: Any] = [
-                .font: NSFont.systemFont(ofSize: 15)
-            ]
-            let attributed = NSAttributedString(string: "⚡️", attributes: attributes)
-            let image = NSImage(size: NSSize(width: 18, height: 18))
-            image.lockFocus()
-            attributed.draw(at: NSPoint(x: 0, y: 0))
-            image.unlockFocus()
-            button.image = image
+            button.image = NSImage(systemSymbolName: "bolt.fill", accessibilityDescription: "Flick")
         }
 
         let menu = NSMenu()
