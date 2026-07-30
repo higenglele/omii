@@ -210,58 +210,27 @@ open flick.xcodeproj
 - 为公共 API 包含适当的文档
 - 尽可能为新功能编写单元测试
 
-## 📈 开发路线图
+## 📖 更多文档
 
-### 计划中的功能
-- [ ] 可自定义的全局快捷键
-- [ ] 代码语法高亮
-- [ ] 图像输入支持 (截图转文本)
+详细文档位于 `docs/` 目录：
 
+| 文档 | 内容 |
+|---|---|
+| [docs/README.md](./docs/README.md) | 项目介绍与快速开始 |
+| [docs/PROJECT_CONTEXT.md](./docs/PROJECT_CONTEXT.md) | 技术栈、模块说明、数据流 |
+| [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) | 架构图、核心流程、状态管理 |
+| [docs/CHANGELOG.md](./docs/CHANGELOG.md) | 版本变更记录 |
+| [docs/ROADMAP.md](./docs/ROADMAP.md) | 完成情况与未来方向 |
+| [docs/TODO.md](./docs/TODO.md) | 待优化项与技术债 |
 
+## 💬 反馈
 
-## 📞 支持与社区
-
-### 获取帮助
-1. **查看上面的 [常见问题](#-常见问题)** 寻找常见解决方案
-2. **搜索现有的 [Issues](https://github.com/yourusername/flick/issues)** 寻找类似问题
-3. **如果找不到答案，请打开新的 Issue**
-
-### 报告问题时请包含
-- Flick 版本 (可在设置 → 关于中查看)
-- macOS 版本
-- 你的 API 配置 (服务类型、选择的模型)
-- 重现问题的步骤
-- 任何相关的错误信息
-
-### 与我们联系
-- 🐛 [Issues](https://github.com/yourusername/flick/issues) - 报告错误或请求功能
-- ⭐ **给项目加星** - 支持我们的工作！
+- 🐛 **Bug 报告 / 功能建议** — 见 `.github/ISSUE_TEMPLATE/`（待仓库启用 Issues）
 
 ## 📄 许可证
 
-Flick 采用 MIT 许可证发布。详见 [LICENSE](LICENSE) 文件。
-
-```
-MIT 许可证
-
-版权所有 (c) 2024 你的名字
-
-特此免费授予任何获得本软件副本...
-```
-
-## 🙏 致谢
-
-- 使用 ❤️ Swift 和 SwiftUI 构建
-- 图标来自 [Lucide](https://lucide.dev/)
-- 灵感来自生产力工具社区
-- 感谢所有贡献者和测试者！
+MIT © 2026 tape。详见 [LICENSE](LICENSE)。
 
 ---
 
 **祝你使用愉快！** ✨
-
-无论你是编写文档、翻译内容、头脑风暴，还是仅仅探索 AI 能力，Flick 都旨在让 AI 助手变得轻松且融入你的日常工作流。尝试一下，体验在所有 macOS 应用程序中无缝处理文本！
-
----
-
-*注：Flick 是一个独立项目，与 OpenAI、DeepSeek 或其他任何 AI 服务提供商无关。请确保你始终遵守所使用的 AI 提供商的服务条款。*
