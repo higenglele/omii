@@ -8,6 +8,10 @@ DerivedData/
 *.xcscmblueprint
 *.xcodeproj/project.xcworkspace
 *.xcodeproj/xcuserdata
+!Flick.xcodeproj/project.xcworkspace/
+!Flick.xcodeproj/project.xcworkspace/xcshareddata/
+!Flick.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+!Flick.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 
 # Build products
 build/
