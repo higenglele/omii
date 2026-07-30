@@ -44,10 +44,12 @@ struct OpenRouterAccountState: Equatable, Sendable {
     static let initial = OpenRouterAccountState(
         connection: .idle,
         balance: nil,
-        isStale: false
+        isStale: false,
+        balanceErrorMessage: nil
     )
 
     var connection: OpenRouterConnectionState
     var balance: BalanceSnapshot?
     var isStale: Bool
+    var balanceErrorMessage: String?
 }

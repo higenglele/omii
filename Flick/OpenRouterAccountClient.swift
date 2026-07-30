@@ -5,7 +5,19 @@
 
 import Foundation
 
-struct OpenRouterAccountClient {
+protocol OpenRouterAccountServing {
+    func fetchAvailableBalance(
+        baseURL: String,
+        apiKey: String
+    ) async throws -> Decimal
+
+    func checkConnection(
+        baseURL: String,
+        apiKey: String
+    ) async throws
+}
+
+struct OpenRouterAccountClient: OpenRouterAccountServing {
     private let session: URLSession
     private let timeout: TimeInterval
 
