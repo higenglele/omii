@@ -188,8 +188,8 @@ struct PresetPromptView: View {
                     Image(systemName: "chevron.left")
                         .font(.caption)
                         .foregroundStyle(Color(red: 152/255, green: 152/255, blue: 157/255))
+                        .frame(height: 28)
                         .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
                         .background(Color(red: 44/255, green: 44/255, blue: 46/255))
                         .clipShape(Capsule())
                         .overlay(
@@ -216,8 +216,8 @@ struct PresetPromptView: View {
                             Label("复制全部", systemImage: "doc.on.doc")
                                 .font(.caption)
                                 .foregroundStyle(Color(red: 152/255, green: 152/255, blue: 157/255))
+                                .frame(height: 28)
                                 .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
                                 .background(Color(red: 44/255, green: 44/255, blue: 46/255))
                                 .clipShape(Capsule())
                                 .overlay(

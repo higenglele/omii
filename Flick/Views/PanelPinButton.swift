@@ -17,7 +17,8 @@ struct PanelPinButton: View {
                         ? Color(red: 100/255, green: 210/255, blue: 255/255)
                         : Color(red: 99/255, green: 99/255, blue: 102/255)
                 )
-                .padding(6)
+                .padding(.horizontal, 10)
+                .frame(height: 28)
                 .background(
                     pinState == .pinned
                         ? Color(red: 100/255, green: 210/255, blue: 255/255).opacity(0.1)

@@ -452,11 +452,8 @@ struct PromptEditorSheet: View {
                             TextField("", text: $prompt.icon)
                                 .textFieldStyle(.plain)
                                 .font(.title)
-                                .frame(width: 40)
+                                .frame(width: 40, height: 32)
                                 .multilineTextAlignment(.center)
-                            Text("⌃⌘␣")
-                                .font(.caption2)
-                                .foregroundStyle(.tertiary)
                         }
 
                         TextField("名称", text: $prompt.title)
