@@ -199,33 +199,6 @@ class AIService: ObservableObject {
         return models.compactMap { $0["id"] as? String }.sorted()
     }
 
-    static func fetchBalance(baseURL: String, apiKey: String) async throws -> Double {
-        let url = URL(string: "\(normalizedBaseURL(baseURL))/credits")!
-        var request = URLRequest(url: url)
-        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-        request.timeoutInterval = 10
-
-        let (data, response) = try await directSession.data(for: request)
-
-        if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
-            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-               let error = json["error"] as? [String: Any],
-               let message = error["message"] as? String {
-                throw AIError.httpError(httpResponse.statusCode, message)
-            }
-            throw AIError.httpError(httpResponse.statusCode, "Request failed")
-        }
-
-        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let data = json["data"] as? [String: Any],
-              let totalCredits = data["total_credits"] as? Double,
-              let totalUsage = data["total_usage"] as? Double
-        else {
-            throw AIError.invalidResponse
-        }
-
-        return totalCredits - totalUsage
-    }
 }
 
 enum AIError: LocalizedError {

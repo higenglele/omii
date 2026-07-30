@@ -204,9 +204,16 @@ struct PresetPromptView: View {
 
         balanceTask = Task {
             do {
-                let balance = try await AIService.fetchBalance(baseURL: baseURL, apiKey: apiKey)
+                let balance = try await OpenRouterAccountClient()
+                    .fetchAvailableBalance(
+                        baseURL: baseURL,
+                        apiKey: apiKey
+                    )
                 guard !Task.isCancelled else { return }
-                let formattedBalance = String(format: "%.2f", balance)
+                let formattedBalance = String(
+                    format: "%.2f",
+                    NSDecimalNumber(decimal: balance).doubleValue
+                )
                 await MainActor.run {
                     lastBalanceRefreshAt = Date()
                     balanceText = "余额: $\(formattedBalance)"
