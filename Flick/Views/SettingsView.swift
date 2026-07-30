@@ -436,11 +436,7 @@ struct PromptEditorSheet: View {
     let onSave: (CustomPrompt) -> Void
     let onCancel: () -> Void
 
-    private let iconOptions = [
-        "📖", "📝", "🌐", "✏️", "💡",
-        "⭐", "🔍", "💬", "✅", "🔄",
-        "✨", "🧠", "📄", "🔗", "🎯"
-    ]
+
 
     var body: some View {
         VStack(spacing: 12) {
@@ -450,10 +446,17 @@ struct PromptEditorSheet: View {
             ScrollView {
                 Form {
                     Section("基本信息") {
-                        Picker("图标", selection: $prompt.icon) {
-                            ForEach(iconOptions, id: \.self) { icon in
-                                Text(icon).tag(icon)
-                            }
+                        HStack {
+                            Text("图标")
+                            Spacer()
+                            TextField("", text: $prompt.icon)
+                                .textFieldStyle(.plain)
+                                .font(.title)
+                                .frame(width: 40)
+                                .multilineTextAlignment(.center)
+                            Text("⌃⌘␣")
+                                .font(.caption2)
+                                .foregroundStyle(.tertiary)
                         }
 
                         TextField("名称", text: $prompt.title)

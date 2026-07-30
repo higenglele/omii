@@ -110,9 +110,8 @@ struct PresetPromptView: View {
                     .onSubmit { sendCustomPrompt() }
 
                 Button(action: sendCustomPrompt) {
-                    Image(systemName: "paperplane.fill")
+                    Text("👌")
                         .font(.caption)
-                        .foregroundColor(Color(red: 100/255, green: 210/255, blue: 255/255))
                         .frame(width: 32, height: 32)
                         .background(
                             customInput.isEmpty
@@ -200,10 +199,11 @@ struct PresetPromptView: View {
                 }
                 .buttonStyle(.plain)
 
-                Spacer()
-
-                // Center: Model name
-                modelSwitcher
+                // Model name (display only, subtle, no dropdown)
+                Text(displayModelName(settings.modelName))
+                    .font(.caption2)
+                    .foregroundStyle(Color(red: 99/255, green: 99/255, blue: 102/255))
+                    .padding(.leading, 4)
 
                 Spacer()
 
