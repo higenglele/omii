@@ -24,6 +24,7 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
     private var isCorrectingGeometry = false
     private var hasClosed = false
     private var pinStateObservation: AnyCancellable?
+    private var phaseObservation: AnyCancellable?
 
     init(
         session: PanelSession,
@@ -44,6 +45,11 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
             .sink { [weak self] pinState in
                 self?.applyPinState(pinState)
             }
+        phaseObservation = session.$phase
+            .removeDuplicates()
+            .sink { [weak self] phase in
+                self?.applyPhase(phase)
+            }
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(screenParametersDidChange),
@@ -63,8 +69,8 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
                 set: { [session] in session.pinState = $0 }
             ),
             onClose: { [weak self] in self?.close() },
-            onPhaseChange: { [weak self] phase in
-                self?.applyPhase(phase)
+            onPhaseChange: { [session] phase in
+                session.transition(to: phase)
             }
         )
 
@@ -98,6 +104,7 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
         panel.setFrameOrigin(panelOrigin)
         self.panel = panel
         session.window = panel
+        applyPhase(session.phase)
         applyPinState(session.pinState)
         constrainPanelToVisibleScreen()
 
@@ -175,7 +182,6 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
     private func applyPhase(_ phase: PanelPhase) {
         guard let panel else { return }
         currentPhase = phase
-        session.transition(to: phase)
         configure(panel, for: phase)
 
         if phase == .promptList {
