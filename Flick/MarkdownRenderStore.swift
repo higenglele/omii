@@ -6,6 +6,7 @@ struct MarkdownRenderSnapshot: Equatable, Sendable {
     let source: String
     let topLevelBlockCount: Int
     let isFinal: Bool
+    let presentationMode: MarkdownPresentationMode
 }
 
 @MainActor
@@ -15,7 +16,8 @@ final class MarkdownRenderStore: ObservableObject {
     @Published private(set) var snapshot = MarkdownRenderSnapshot(
         source: "",
         topLevelBlockCount: 0,
-        isFinal: false
+        isFinal: false,
+        presentationMode: .markdown
     )
 
     private let throttleInterval: Duration
@@ -93,7 +95,12 @@ final class MarkdownRenderStore: ObservableObject {
         return MarkdownRenderSnapshot(
             source: source,
             topLevelBlockCount: document.childCount,
-            isFinal: isFinal
+            isFinal: isFinal,
+            presentationMode:
+                MarkdownStreamingFallbackPolicy.presentationMode(
+                    for: source,
+                    isFinal: isFinal
+                )
         )
     }
 
