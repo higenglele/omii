@@ -29,7 +29,7 @@ open Flick.xcodeproj
 # 按 ⌘R 运行
 ```
 
-或者去 [Releases](https://github.com/yourusername/flick/releases) 下载 `.dmg` 直接装。
+或者去 [Releases](https://github.com/think2do/Flick/releases/tag/macOS) 下载 `.dmg` 直接装。
 
 ### 第一次用
 
@@ -92,7 +92,7 @@ macOS 不允许一个应用直接读取另一个应用的选中文字。Flick �
 
 ## 贡献
 
-有想法？有 bug？来 [Issues](https://github.com/yourusername/flick/issues) 说一声。
+有想法？有 bug？来 [Issues](https://github.com/think2do/Flick/issues) 说一声。
 
 想写代码？
 
