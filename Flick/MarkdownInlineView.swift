@@ -14,11 +14,13 @@ struct MarkdownInlineView: View {
 enum MarkdownInlineRenderer {
     static func render(_ source: String) -> AttributedString {
         let document = Document(parsing: source)
+        return renderChildren(of: document)
+    }
+
+    static func renderChildren(of markup: Markup) -> AttributedString {
         var result = AttributedString()
 
-        for block in document.children {
-            appendChildren(of: block, context: InlineContext(), to: &result)
-        }
+        appendChildren(of: markup, context: InlineContext(), to: &result)
 
         return result
     }
