@@ -12,12 +12,28 @@
 
 /* Begin PBXFileReference section */
 		2D70CB08301B01DC00A9A9CF /* Flick.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Flick.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A1000001301B01DC00A9A9CF /* FlickTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FlickTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXContainerItemProxy section */
+		A1000008301B01DC00A9A9CF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2D70CB00301B01DC00A9A9CF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2D70CB07301B01DC00A9A9CF;
+			remoteInfo = Flick;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		2D70CB0A301B01DC00A9A9CF /* Flick */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Flick;
+			sourceTree = "<group>";
+		};
+		A1000002301B01DC00A9A9CF /* FlickTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = FlickTests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -31,6 +47,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A1000003301B01DC00A9A9CF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -38,6 +61,7 @@
 			isa = PBXGroup;
 			children = (
 				2D70CB0A301B01DC00A9A9CF /* Flick */,
+				A1000002301B01DC00A9A9CF /* FlickTests */,
 				2D70CB09301B01DC00A9A9CF /* Products */,
 			);
 			sourceTree = "<group>";
@@ -46,6 +70,7 @@
 			isa = PBXGroup;
 			children = (
 				2D70CB08301B01DC00A9A9CF /* Flick.app */,
+				A1000001301B01DC00A9A9CF /* FlickTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -76,6 +101,29 @@
 			productReference = 2D70CB08301B01DC00A9A9CF /* Flick.app */;
 			productType = "com.apple.product-type.application";
 		};
+		A1000006301B01DC00A9A9CF /* FlickTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A100000B301B01DC00A9A9CF /* Build configuration list for PBXNativeTarget "FlickTests" */;
+			buildPhases = (
+				A1000004301B01DC00A9A9CF /* Sources */,
+				A1000003301B01DC00A9A9CF /* Frameworks */,
+				A1000005301B01DC00A9A9CF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A1000007301B01DC00A9A9CF /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				A1000002301B01DC00A9A9CF /* FlickTests */,
+			);
+			name = FlickTests;
+			packageProductDependencies = (
+			);
+			productName = FlickTests;
+			productReference = A1000001301B01DC00A9A9CF /* FlickTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -88,6 +136,10 @@
 				TargetAttributes = {
 					2D70CB07301B01DC00A9A9CF = {
 						CreatedOnToolsVersion = 26.6;
+					};
+					A1000006301B01DC00A9A9CF = {
+						CreatedOnToolsVersion = 26.6;
+						TestTargetID = 2D70CB07301B01DC00A9A9CF;
 					};
 				};
 			};
@@ -109,12 +161,20 @@
 			projectRoot = "";
 			targets = (
 				2D70CB07301B01DC00A9A9CF /* Flick */,
+				A1000006301B01DC00A9A9CF /* FlickTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		2D70CB06301B01DC00A9A9CF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1000005301B01DC00A9A9CF /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -131,7 +191,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A1000004301B01DC00A9A9CF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A1000007301B01DC00A9A9CF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2D70CB07301B01DC00A9A9CF /* Flick */;
+			targetProxy = A1000008301B01DC00A9A9CF /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		2D70CB11301B01DD00A9A9CF /* Debug */ = {
@@ -312,6 +387,34 @@
 			};
 			name = Release;
 		};
+		A1000009301B01DC00A9A9CF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tape.FlickTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Flick.app/Contents/MacOS/Flick";
+			};
+			name = Debug;
+		};
+		A100000A301B01DC00A9A9CF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tape.FlickTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Flick.app/Contents/MacOS/Flick";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -329,6 +432,15 @@
 			buildConfigurations = (
 				2D70CB14301B01DD00A9A9CF /* Debug */,
 				2D70CB15301B01DD00A9A9CF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A100000B301B01DC00A9A9CF /* Build configuration list for PBXNativeTarget "FlickTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A1000009301B01DC00A9A9CF /* Debug */,
+				A100000A301B01DC00A9A9CF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
