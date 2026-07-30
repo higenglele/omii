@@ -19,7 +19,7 @@ class AIService: ObservableObject {
     /// Can be overridden for testing with mock responses.
     var urlSession: URLSession
 
-    init(urlSession: URLSession = AIService.defaultSession) {
+    init(urlSession: URLSession = AIService.directSession) {
         self.urlSession = urlSession
     }
 
@@ -76,9 +76,13 @@ class AIService: ObservableObject {
         isReasoning = false
     }
 
-    /// A URLSession using system default proxy settings.
-    private static let defaultSession: URLSession = {
-        URLSession(configuration: .default)
+    /// A URLSession that bypasses system proxy to avoid auth header stripping.
+    /// Some proxies strip the Authorization header, which breaks API authentication.
+    /// By bypassing the proxy, the auth header goes directly to the API server.
+    private static let directSession: URLSession = {
+        let config = URLSessionConfiguration.default
+        config.connectionProxyDictionary = [:]
+        return URLSession(configuration: config)
     }()
 
     private func streamChat(
@@ -187,7 +191,7 @@ class AIService: ObservableObject {
         request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         request.timeoutInterval = 10
 
-        let (data, response) = try await defaultSession.data(for: request)
+        let (data, response) = try await directSession.data(for: request)
 
         if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
             if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
