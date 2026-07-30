@@ -9,7 +9,7 @@ import SwiftUI
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     private var hotkeyManager: GlobalHotkeyManager?
-    private let floatingPanel = FloatingPanelController()
+    private let floatingPanels = FloatingPanelManager()
     private var settingsWindow: NSWindow?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -45,7 +45,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             guard let self, let text, !text.isEmpty else { return }
             DispatchQueue.main.async {
                 let mouseLocation = NSEvent.mouseLocation
-                self.floatingPanel.show(at: mouseLocation, with: text)
+                self.floatingPanels.show(at: mouseLocation, with: text)
             }
         }
     }

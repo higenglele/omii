@@ -13,21 +13,27 @@ class KeyablePanel: NSPanel {
 
 class FloatingPanelController: NSObject, NSWindowDelegate {
     private var panel: NSPanel?
-    private var session: PanelSession?
+    let session: PanelSession
     private var monitor: Any?
     private let preferencesStore: PanelPreferencesStore
     private let geometryService: PanelGeometryService
     private let sizePersistence: PanelSizePersistenceCoordinator
+    private let onClose: (UUID) -> Void
     private var currentPhase: PanelPhase = .promptList
     private var moveCorrectionTask: Task<Void, Never>?
     private var isCorrectingGeometry = false
+    private var hasClosed = false
 
     init(
+        session: PanelSession,
         preferencesStore: PanelPreferencesStore = PanelPreferencesStore(),
-        geometryService: PanelGeometryService = PanelGeometryService()
+        geometryService: PanelGeometryService = PanelGeometryService(),
+        onClose: @escaping (UUID) -> Void = { _ in }
     ) {
+        self.session = session
         self.preferencesStore = preferencesStore
         self.geometryService = geometryService
+        self.onClose = onClose
         sizePersistence = PanelSizePersistenceCoordinator(
             preferencesStore: preferencesStore
         )
@@ -40,14 +46,11 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
         )
     }
 
-    func show(at point: NSPoint, with selectedText: String) {
-        close()
-
+    func show(at point: NSPoint) {
         let listSize = promptListSize()
 
-        let session = PanelSession(selectedText: selectedText)
         let view = PresetPromptView(
-            selectedText: selectedText,
+            selectedText: session.selectedText,
             aiService: session.aiService,
             onClose: { [weak self] in self?.close() },
             onPhaseChange: { [weak self] phase in
@@ -85,7 +88,6 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
         )
         panel.setFrameOrigin(panelOrigin)
         self.panel = panel
-        self.session = session
         session.window = panel
         constrainPanelToVisibleScreen()
 
@@ -98,16 +100,18 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
     }
 
     func close() {
+        guard !hasClosed else { return }
+        hasClosed = true
         moveCorrectionTask?.cancel()
         moveCorrectionTask = nil
         panel?.delegate = nil
-        session?.close()
-        session = nil
+        session.close()
         panel = nil
         if let monitor {
             NSEvent.removeMonitor(monitor)
         }
         monitor = nil
+        onClose(session.id)
     }
 
     func promptListSize() -> NSSize {
@@ -169,7 +173,7 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
     private func applyPhase(_ phase: PanelPhase) {
         guard let panel else { return }
         currentPhase = phase
-        session?.transition(to: phase)
+        session.transition(to: phase)
         configure(panel, for: phase)
 
         if phase == .promptList {
