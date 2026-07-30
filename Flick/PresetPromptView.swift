@@ -9,6 +9,7 @@ struct PresetPromptView: View {
     let selectedText: String
     @ObservedObject var aiService: AIService
     @ObservedObject private var settings = SettingsManager.shared
+    @Binding var pinState: PinState
     let onClose: () -> Void
     let onPhaseChange: (PanelPhase) -> Void
 
@@ -259,6 +260,8 @@ struct PresetPromptView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
+
+                PanelPinButton(pinState: $pinState)
             }
             .padding(.horizontal, 12)
             .padding(.top, 8)

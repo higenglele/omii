@@ -52,6 +52,10 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
         let view = PresetPromptView(
             selectedText: session.selectedText,
             aiService: session.aiService,
+            pinState: Binding(
+                get: { [session] in session.pinState },
+                set: { [session] in session.pinState = $0 }
+            ),
             onClose: { [weak self] in self?.close() },
             onPhaseChange: { [weak self] phase in
                 self?.applyPhase(phase)

@@ -21,6 +21,10 @@ enum PanelPhase: String, Codable, Equatable, Sendable {
 enum PinState: String, Codable, Equatable, Sendable {
     case unpinned
     case pinned
+
+    mutating func toggle() {
+        self = self == .pinned ? .unpinned : .pinned
+    }
 }
 
 struct BalanceSnapshot: Codable, Equatable, Sendable {
