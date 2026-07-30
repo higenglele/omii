@@ -8,6 +8,7 @@ import AppKit
 /// Creates and retains independent floating-panel controllers.
 final class FloatingPanelManager {
     private var controllers: [UUID: FloatingPanelController] = [:]
+    private let outsideClickMonitor = OutsideClickMonitor()
 
     var activeSessionCount: Int {
         controllers.count
@@ -15,6 +16,7 @@ final class FloatingPanelManager {
 
     @discardableResult
     func show(at point: NSPoint, with selectedText: String) -> UUID {
+        startOutsideClickMonitoring()
         let session = PanelSession(selectedText: selectedText)
         let controller = FloatingPanelController(
             session: session,
@@ -41,7 +43,23 @@ final class FloatingPanelManager {
         activeControllers.forEach { $0.close() }
     }
 
+    func processOutsideClick() {
+        let unpinnedControllers = controllers.values.filter {
+            $0.session.pinState == .unpinned
+        }
+        unpinnedControllers.forEach { $0.close() }
+    }
+
+    private func startOutsideClickMonitoring() {
+        outsideClickMonitor.start { [weak self] in
+            self?.processOutsideClick()
+        }
+    }
+
     private func removeClosedSession(id: UUID) {
         controllers[id] = nil
+        if controllers.isEmpty {
+            outsideClickMonitor.stop()
+        }
     }
 }

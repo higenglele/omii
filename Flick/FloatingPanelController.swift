@@ -14,7 +14,6 @@ class KeyablePanel: NSPanel {
 class FloatingPanelController: NSObject, NSWindowDelegate {
     private var panel: NSPanel?
     let session: PanelSession
-    private var monitor: Any?
     private let preferencesStore: PanelPreferencesStore
     private let geometryService: PanelGeometryService
     private let sizePersistence: PanelSizePersistenceCoordinator
@@ -97,10 +96,6 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
 
         panel.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
-
-        monitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
-            self?.close()
-        }
     }
 
     func close() {
@@ -111,10 +106,6 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
         panel?.delegate = nil
         session.close()
         panel = nil
-        if let monitor {
-            NSEvent.removeMonitor(monitor)
-        }
-        monitor = nil
         onClose(session.id)
     }
 
