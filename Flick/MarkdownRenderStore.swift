@@ -53,6 +53,18 @@ final class MarkdownRenderStore: ObservableObject {
         schedule(source: latestSource, isFinal: true, delay: .zero)
     }
 
+    func reset() {
+        parseTask?.cancel()
+        revision += 1
+        latestSource = ""
+        snapshot = MarkdownRenderSnapshot(
+            source: "",
+            topLevelBlockCount: 0,
+            isFinal: false,
+            presentationMode: .markdown
+        )
+    }
+
     func waitForPendingRender() async {
         await parseTask?.value
     }

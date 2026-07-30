@@ -19,6 +19,9 @@ struct PresetPromptView: View {
     @State private var balanceTask: Task<Void, Never>?
     @State private var lastBalanceRefreshAt: Date?
     @State private var shouldRefreshBalanceAfterResponse = false
+    @StateObject private var markdownRenderStore = MarkdownRenderStore()
+    @StateObject private var scrollCoordinator = ResponseScrollCoordinator()
+    @State private var isUserScrollingResponse = false
     private var prompts: [CustomPrompt] { settings.customPrompts }
     private var favoriteModels: [String] {
         settings.favoriteModels.filter { !$0.isEmpty }
@@ -81,6 +84,7 @@ struct PresetPromptView: View {
     // MARK: - Compact Prompt List
 
     private func triggerPrompt(_ prompt: CustomPrompt) {
+        prepareForResponse()
         activePrompt = prompt
         let promptText = prompt.systemPrompt
         if promptText.contains("{{text}}") {
@@ -146,6 +150,7 @@ struct PresetPromptView: View {
 
     private func sendCustomPrompt() {
         guard !customInput.isEmpty else { return }
+        prepareForResponse()
         isCustomMode = true
         let userMessage = customInput + "\n\n" + selectedText
         aiService.sendRequest(systemPrompt: "", userContent: userMessage)
@@ -219,11 +224,18 @@ struct PresetPromptView: View {
 
     @State private var reasoningExpanded = false
 
+    private func prepareForResponse() {
+        markdownRenderStore.reset()
+        scrollCoordinator.reset()
+        isUserScrollingResponse = false
+    }
+
     private var responseView: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
                 Button(action: {
                     aiService.cancel()
+                    prepareForResponse()
                     activePrompt = nil
                     isCustomMode = false
                     let listHeight = CGFloat(32 + prompts.count * 30 + 8 + 54)
@@ -278,7 +290,10 @@ struct PresetPromptView: View {
 
                             // Final result with Markdown
                             if !aiService.responseText.isEmpty {
-                                markdownContent(aiService.responseText)
+                                StreamingMarkdownContentView(
+                                    snapshot: markdownRenderStore.snapshot,
+                                    fallbackSource: aiService.responseText
+                                )
                             }
                         }
 
@@ -288,16 +303,55 @@ struct PresetPromptView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 12)
                 }
-                .onChange(of: aiService.reasoningText) {
-                    withAnimation { proxy.scrollTo("bottom") }
+                .onScrollPhaseChange { _, newPhase in
+                    isUserScrollingResponse =
+                        newPhase == .tracking
+                        || newPhase == .interacting
+                        || newPhase == .decelerating
                 }
-                .onChange(of: aiService.responseText) {
-                    withAnimation { proxy.scrollTo("bottom") }
+                .onScrollGeometryChange(
+                    for: CGFloat.self,
+                    of: { geometry in
+                        max(
+                            0,
+                            geometry.contentSize.height
+                                - geometry.visibleRect.maxY
+                        )
+                    },
+                    action: { _, distanceFromBottom in
+                        guard isUserScrollingResponse else { return }
+                        scrollCoordinator.userDidScroll(
+                            distanceFromBottom: distanceFromBottom
+                        )
+                    }
+                )
+                .onChange(of: aiService.reasoningText) {
+                    guard scrollCoordinator.shouldFollowNewContent else { return }
+                    proxy.scrollTo("bottom", anchor: .bottom)
+                }
+                .onChange(of: aiService.responseText) { _, newResponse in
+                    markdownRenderStore.update(source: newResponse)
+                }
+                .onChange(of: markdownRenderStore.snapshot) {
+                    guard scrollCoordinator.shouldFollowNewContent else { return }
+                    proxy.scrollTo("bottom", anchor: .bottom)
                 }
                 .onChange(of: aiService.isLoading) {
+                    if !aiService.isLoading {
+                        markdownRenderStore.finish(
+                            source: aiService.responseText
+                        )
+                    }
                     guard !aiService.isLoading, shouldRefreshBalanceAfterResponse else { return }
                     shouldRefreshBalanceAfterResponse = false
                     loadBalance(force: true)
+                }
+                .onAppear {
+                    if !aiService.responseText.isEmpty {
+                        markdownRenderStore.update(
+                            source: aiService.responseText
+                        )
+                    }
                 }
             }
 
@@ -305,8 +359,7 @@ struct PresetPromptView: View {
                 HStack {
                     Spacer()
                     Button(action: {
-                        NSPasteboard.general.clearContents()
-                        NSPasteboard.general.setString(aiService.responseText, forType: .string)
+                        ResponseCopyAction.copy(aiService.responseText)
                     }) {
                         Label("复制", systemImage: "doc.on.doc")
                             .font(.caption)
@@ -394,10 +447,4 @@ struct PresetPromptView: View {
         .frame(maxWidth: 110)
     }
 
-    @ViewBuilder
-    private func markdownContent(_ text: String) -> some View {
-        Text(LocalizedStringKey(text))
-            .font(.callout)
-            .textSelection(.enabled)
-    }
 }
