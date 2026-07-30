@@ -21,9 +21,13 @@ struct PanelPinButton: View {
                 .background(
                     pinState == .pinned
                         ? Color(red: 100/255, green: 210/255, blue: 255/255).opacity(0.1)
-                        : Color.clear
+                        : Color(red: 44/255, green: 44/255, blue: 46/255)
                 )
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .clipShape(Capsule())
+                .overlay(
+                    Capsule()
+                        .stroke(Color(red: 58/255, green: 58/255, blue: 60/255), lineWidth: 0.5)
+                )
         }
         .buttonStyle(.plain)
         .help(pinState == .pinned ? "取消固定浮窗" : "固定浮窗")

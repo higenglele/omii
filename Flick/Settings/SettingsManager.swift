@@ -22,11 +22,11 @@ struct CustomPrompt: Identifiable, Codable, Equatable {
     }
 
     static let defaults: [CustomPrompt] = [
-        CustomPrompt(icon: "book", title: "解释", systemPrompt: "请清晰简洁地解释以下内容。如果是词语或短语，请给出定义和用法。\n\n{{text}}"),
-        CustomPrompt(icon: "doc.text", title: "总结", systemPrompt: "请简洁地总结以下内容，提炼关键要点。\n\n{{text}}"),
-        CustomPrompt(icon: "globe", title: "翻译为中文", systemPrompt: "请将以下内容翻译为中文。只输出翻译结果，不需要解释。\n\n{{text}}"),
-        CustomPrompt(icon: "pencil.line", title: "润色", systemPrompt: "请润色和改进以下内容，保持原意不变，使其更流畅、更专业。\n\n{{text}}"),
-        CustomPrompt(icon: "lightbulb", title: "续写", systemPrompt: "请根据以下内容继续写作，保持一致的风格和语气。\n\n{{text}}")
+        CustomPrompt(icon: "📖", title: "解释", systemPrompt: "请清晰简洁地解释以下内容。如果是词语或短语，请给出定义和用法。\n\n{{text}}"),
+        CustomPrompt(icon: "📝", title: "总结", systemPrompt: "请简洁地总结以下内容，提炼关键要点。\n\n{{text}}"),
+        CustomPrompt(icon: "🌐", title: "翻译为中文", systemPrompt: "请将以下内容翻译为中文。只输出翻译结果，不需要解释。\n\n{{text}}"),
+        CustomPrompt(icon: "✏️", title: "润色", systemPrompt: "请润色和改进以下内容，保持原意不变，使其更流畅、更专业。\n\n{{text}}"),
+        CustomPrompt(icon: "💡", title: "续写", systemPrompt: "请根据以下内容继续写作，保持一致的风格和语气。\n\n{{text}}")
     ]
 }
 

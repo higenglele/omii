@@ -178,7 +178,7 @@ struct SettingsView: View {
                         Image(systemName: "line.3.horizontal")
                             .font(.caption)
                             .foregroundStyle(.tertiary)
-                        Image(systemName: prompt.icon)
+                        Text(prompt.icon)
                             .frame(width: 20)
                             .foregroundStyle(.secondary)
                         VStack(alignment: .leading, spacing: 2) {
@@ -437,10 +437,9 @@ struct PromptEditorSheet: View {
     let onCancel: () -> Void
 
     private let iconOptions = [
-        "star", "book", "doc.text", "globe", "pencil.line", "lightbulb",
-        "text.magnifyingglass", "text.quote", "checkmark.circle",
-        "arrow.triangle.2.circlepath", "wand.and.stars", "brain",
-        "character.bubble", "translate", "doc.plaintext"
+        "📖", "📝", "🌐", "✏️", "💡",
+        "⭐", "🔍", "💬", "✅", "🔄",
+        "✨", "🧠", "📄", "🔗", "🎯"
     ]
 
     var body: some View {
@@ -453,7 +452,7 @@ struct PromptEditorSheet: View {
                     Section("基本信息") {
                         Picker("图标", selection: $prompt.icon) {
                             ForEach(iconOptions, id: \.self) { icon in
-                                Label(icon, systemImage: icon).tag(icon)
+                                Text(icon).tag(icon)
                             }
                         }
 

@@ -34,8 +34,9 @@ struct PresetPromptView: View {
         VStack(alignment: .leading, spacing: 0) {
             if activePrompt == nil && !isCustomMode {
                 HStack(spacing: 8) {
+                    Spacer()
                     modelSwitcher
-                    Spacer(minLength: 8)
+                    Spacer()
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 12)
@@ -77,9 +78,8 @@ struct PresetPromptView: View {
                             .font(.caption2.monospaced())
                             .foregroundStyle(.tertiary)
                             .frame(width: 14)
-                        Image(systemName: prompt.icon)
+                        Text(prompt.icon)
                             .font(.caption)
-                            .frame(width: 16)
                         Text(prompt.title)
                             .font(.callout)
                         Spacer()
@@ -178,7 +178,7 @@ struct PresetPromptView: View {
     private var responseView: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
-                // Left: Back button (icon only)
+                // Left: Back button (icon only, pill size)
                 Button(action: {
                     aiService.cancel()
                     prepareForResponse()
@@ -189,9 +189,14 @@ struct PresetPromptView: View {
                     Image(systemName: "chevron.left")
                         .font(.caption)
                         .foregroundStyle(Color(red: 152/255, green: 152/255, blue: 157/255))
-                        .padding(6)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
                         .background(Color(red: 44/255, green: 44/255, blue: 46/255))
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .clipShape(Capsule())
+                        .overlay(
+                            Capsule()
+                                .stroke(Color(red: 58/255, green: 58/255, blue: 60/255), lineWidth: 0.5)
+                        )
                 }
                 .buttonStyle(.plain)
 
@@ -202,8 +207,30 @@ struct PresetPromptView: View {
 
                 Spacer()
 
-                // Right: Pin button only
-                PanelPinButton(pinState: $pinState)
+                // Right: Copy all + Pin
+                HStack(spacing: 6) {
+                    if !aiService.responseText.isEmpty {
+                        Button(action: {
+                            ResponseCopyAction.copy(aiService.responseText)
+                        }) {
+                            Label("复制全部", systemImage: "doc.on.doc")
+                                .font(.caption)
+                                .foregroundStyle(Color(red: 152/255, green: 152/255, blue: 157/255))
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(Color(red: 44/255, green: 44/255, blue: 46/255))
+                                .clipShape(Capsule())
+                                .overlay(
+                                    Capsule()
+                                        .stroke(Color(red: 58/255, green: 58/255, blue: 60/255), lineWidth: 0.5)
+                                )
+                        }
+                        .buttonStyle(.plain)
+                        .transition(.opacity)
+                    }
+
+                    PanelPinButton(pinState: $pinState)
+                }
             }
             .padding(.horizontal, 16)
             .padding(.top, 12)
@@ -296,29 +323,7 @@ struct PresetPromptView: View {
                 }
             }
 
-            if !aiService.responseText.isEmpty {
-                HStack {
-                    Spacer()
-                    Button(action: {
-                        ResponseCopyAction.copy(aiService.responseText)
-                    }) {
-                        Label("复制全部", systemImage: "doc.on.doc")
-                            .font(.caption)
-                            .foregroundStyle(Color(red: 152/255, green: 152/255, blue: 157/255))
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 6)
-                            .background(Color(red: 44/255, green: 44/255, blue: 46/255))
-                            .clipShape(Capsule())
-                            .overlay(
-                                Capsule()
-                                    .stroke(Color(red: 58/255, green: 58/255, blue: 60/255), lineWidth: 0.5)
-                            )
-                    }
-                    .buttonStyle(.plain)
-                }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 10)
-            }
+
         }
     }
 
