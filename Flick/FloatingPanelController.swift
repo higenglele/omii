@@ -11,11 +11,13 @@ class KeyablePanel: NSPanel {
     override var canBecomeKey: Bool { true }
 }
 
-class FloatingPanelController {
+class FloatingPanelController: NSObject, NSWindowDelegate {
     private var panel: NSPanel?
     private var monitor: Any?
     private let preferencesStore: PanelPreferencesStore
     private let geometryService: PanelGeometryService
+    private let sizePersistence: PanelSizePersistenceCoordinator
+    private var currentPhase: PanelPhase = .promptList
 
     init(
         preferencesStore: PanelPreferencesStore = PanelPreferencesStore(),
@@ -23,6 +25,10 @@ class FloatingPanelController {
     ) {
         self.preferencesStore = preferencesStore
         self.geometryService = geometryService
+        sizePersistence = PanelSizePersistenceCoordinator(
+            preferencesStore: preferencesStore
+        )
+        super.init()
     }
 
     func show(at point: NSPoint, with selectedText: String) {
@@ -60,6 +66,7 @@ class FloatingPanelController {
         panel.hasShadow = true
         panel.contentView = hostingView
         panel.isMovableByWindowBackground = true
+        panel.delegate = self
         configure(panel, for: .promptList)
 
         // Position near mouse cursor
@@ -79,6 +86,7 @@ class FloatingPanelController {
     }
 
     func close() {
+        panel?.delegate = nil
         panel?.orderOut(nil)
         panel = nil
         if let monitor {
@@ -145,6 +153,7 @@ class FloatingPanelController {
 
     private func applyPhase(_ phase: PanelPhase) {
         guard let panel else { return }
+        currentPhase = phase
         configure(panel, for: phase)
 
         if phase == .promptList {
@@ -172,5 +181,18 @@ class FloatingPanelController {
         geometryService.primaryScreen(for: panel.frame)?.visibleFrame
             ?? panel.screen?.visibleFrame
             ?? NSScreen.main?.visibleFrame
+    }
+
+    func windowDidEndLiveResize(_ notification: Notification) {
+        guard let resizedPanel = notification.object as? NSPanel,
+              resizedPanel === panel
+        else {
+            return
+        }
+
+        sizePersistence.recordUserResize(
+            resizedPanel.frame.size,
+            phase: currentPhase
+        )
     }
 }
