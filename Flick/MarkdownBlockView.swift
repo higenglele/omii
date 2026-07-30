@@ -6,10 +6,19 @@ struct MarkdownBlockView: View {
 
     var body: some View {
         let document = Document(parsing: source)
+        let footnoteDefinitions =
+            MarkdownPlainTextRenderer.unsupportedFootnoteDefinitions(in: source)
 
         VStack(alignment: .leading, spacing: 10) {
             ForEach(Array(document.children.enumerated()), id: \.offset) { _, block in
                 MarkdownBlockRenderer.view(for: block)
+            }
+
+            ForEach(Array(footnoteDefinitions.enumerated()), id: \.offset) { _, definition in
+                Text(definition)
+                    .font(.callout)
+                    .textSelection(.enabled)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -73,11 +82,23 @@ enum MarkdownBlockRenderer {
             )
         }
 
+        if let htmlBlock = markup as? HTMLBlock {
+            return readableFallback(htmlBlock.rawHTML)
+        }
+
+        if markup is Markdown.Table {
+            return readableFallback(MarkdownPlainTextRenderer.text(from: markup))
+        }
+
         if markup is ThematicBreak {
             return AnyView(Divider().padding(.vertical, 4))
         }
 
-        return AnyView(childBlocks(of: markup))
+        if markup.childCount > 0 {
+            return AnyView(childBlocks(of: markup))
+        }
+
+        return readableFallback(MarkdownPlainTextRenderer.text(from: markup))
     }
 
     private static func listView(
@@ -121,5 +142,14 @@ enum MarkdownBlockRenderer {
         default:
             return .subheadline.bold()
         }
+    }
+
+    private static func readableFallback(_ text: String) -> AnyView {
+        AnyView(
+            Text(text)
+                .font(.callout)
+                .textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        )
     }
 }

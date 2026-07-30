@@ -42,6 +42,20 @@ enum MarkdownInlineRenderer {
             return
         }
 
+        if let image = markup as? Markdown.Image {
+            let alternativeText = MarkdownPlainTextRenderer.text(from: image)
+            let label = alternativeText.isEmpty
+                ? "[图片]"
+                : "[图片: \(alternativeText)]"
+            result.append(attributedString(label, context: context))
+            return
+        }
+
+        if let inlineHTML = markup as? InlineHTML {
+            result.append(attributedString(inlineHTML.rawHTML, context: context))
+            return
+        }
+
         if markup is SoftBreak || markup is LineBreak {
             result.append(attributedString("\n", context: context))
             return
