@@ -4,6 +4,7 @@
 //
 
 import AppKit
+import Combine
 import SwiftUI
 
 /// Custom NSPanel that can become key window to receive keyboard events
@@ -22,6 +23,7 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
     private var moveCorrectionTask: Task<Void, Never>?
     private var isCorrectingGeometry = false
     private var hasClosed = false
+    private var pinStateObservation: AnyCancellable?
 
     init(
         session: PanelSession,
@@ -37,6 +39,11 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
             preferencesStore: preferencesStore
         )
         super.init()
+        pinStateObservation = session.$pinState
+            .removeDuplicates()
+            .sink { [weak self] pinState in
+                self?.applyPinState(pinState)
+            }
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(screenParametersDidChange),
@@ -75,7 +82,6 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
             defer: false
         )
         panel.isFloatingPanel = true
-        panel.level = .floating
         panel.isOpaque = false
         panel.backgroundColor = .clear
         panel.hasShadow = true
@@ -92,6 +98,7 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
         panel.setFrameOrigin(panelOrigin)
         self.panel = panel
         session.window = panel
+        applyPinState(session.pinState)
         constrainPanelToVisibleScreen()
 
         panel.makeKeyAndOrderFront(nil)
@@ -174,6 +181,11 @@ class FloatingPanelController: NSObject, NSWindowDelegate {
         if phase == .promptList {
             resizePanel(panel, to: promptListSize())
         }
+    }
+
+    private func applyPinState(_ pinState: PinState) {
+        guard let panel else { return }
+        PanelWindowLevelPolicy.apply(pinState, to: panel)
     }
 
     private func resizePanel(_ panel: NSPanel, to size: NSSize) {
