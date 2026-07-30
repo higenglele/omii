@@ -16,10 +16,6 @@ struct PresetPromptView: View {
     @State private var activePrompt: CustomPrompt?
     @State private var customInput: String = ""
     @State private var isCustomMode = false
-    @State private var balanceText: String = "余额读取中..."
-    @State private var balanceTask: Task<Void, Never>?
-    @State private var lastBalanceRefreshAt: Date?
-    @State private var shouldRefreshBalanceAfterResponse = false
     @StateObject private var markdownRenderStore = MarkdownRenderStore()
     @StateObject private var scrollCoordinator = ResponseScrollCoordinator()
     @State private var isUserScrollingResponse = false
@@ -37,14 +33,9 @@ struct PresetPromptView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 8) {
-                Text(balanceText)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
+                modelSwitcher
 
                 Spacer(minLength: 8)
-
-                modelSwitcher
 
                 Button(action: {
                     settings.enableReasoning.toggle()
@@ -74,12 +65,6 @@ struct PresetPromptView: View {
             RoundedRectangle(cornerRadius: 10)
                 .stroke(.quaternary, lineWidth: 0.5)
         )
-        .onAppear {
-            loadBalance(force: true)
-        }
-        .onDisappear {
-            balanceTask?.cancel()
-        }
     }
 
     // MARK: - Compact Prompt List
@@ -95,7 +80,6 @@ struct PresetPromptView: View {
         } else {
             aiService.sendRequest(systemPrompt: promptText, userContent: selectedText)
         }
-        shouldRefreshBalanceAfterResponse = true
     }
 
     private var promptList: some View {
@@ -156,7 +140,6 @@ struct PresetPromptView: View {
         onPhaseChange(.response)
         let userMessage = customInput + "\n\n" + selectedText
         aiService.sendRequest(systemPrompt: "", userContent: userMessage)
-        shouldRefreshBalanceAfterResponse = true
     }
 
     @State private var keyMonitor: Any?
@@ -177,54 +160,6 @@ struct PresetPromptView: View {
         if let monitor = keyMonitor {
             NSEvent.removeMonitor(monitor)
             keyMonitor = nil
-        }
-    }
-
-    private func loadBalance(force: Bool = false) {
-        let settings = SettingsManager.shared
-        guard !settings.apiKey.isEmpty else {
-            balanceText = "余额: 未配置 Key"
-            return
-        }
-
-        guard settings.apiBaseURL.localizedCaseInsensitiveContains("openrouter.ai") else {
-            balanceText = "余额: 非 OpenRouter"
-            return
-        }
-
-        if !force,
-           let lastBalanceRefreshAt,
-           Date().timeIntervalSince(lastBalanceRefreshAt) < 2 {
-            return
-        }
-
-        let baseURL = settings.apiBaseURL
-        let apiKey = settings.apiKey
-        balanceTask?.cancel()
-
-        balanceTask = Task {
-            do {
-                let balance = try await OpenRouterAccountClient()
-                    .fetchAvailableBalance(
-                        baseURL: baseURL,
-                        apiKey: apiKey
-                    )
-                guard !Task.isCancelled else { return }
-                let formattedBalance = String(
-                    format: "%.2f",
-                    NSDecimalNumber(decimal: balance).doubleValue
-                )
-                await MainActor.run {
-                    lastBalanceRefreshAt = Date()
-                    balanceText = "余额: $\(formattedBalance)"
-                }
-            } catch {
-                guard !Task.isCancelled else { return }
-                await MainActor.run {
-                    lastBalanceRefreshAt = Date()
-                    balanceText = "余额读取失败"
-                }
-            }
         }
     }
 
@@ -351,9 +286,6 @@ struct PresetPromptView: View {
                             source: aiService.responseText
                         )
                     }
-                    guard !aiService.isLoading, shouldRefreshBalanceAfterResponse else { return }
-                    shouldRefreshBalanceAfterResponse = false
-                    loadBalance(force: true)
                 }
                 .onAppear {
                     if !aiService.responseText.isEmpty {
