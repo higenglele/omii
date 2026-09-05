@@ -56,3 +56,6 @@ logs/
 
 # Personal settings
 *.personal.xcconfig
+build/
+*.dmg
+dmg-staging/
