@@ -50,11 +50,11 @@ struct PresetPromptView: View {
                 responseView
             }
         }
-        .background(Color(red: 28/255, green: 28/255, blue: 30/255))
+        .background(VisualEffectBackground())
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .stroke(Color(red: 58/255, green: 58/255, blue: 60/255), lineWidth: 0.5)
+                .stroke(Color.white.opacity(0.14), lineWidth: 0.5)
         )
     }
 
@@ -105,11 +105,11 @@ struct PresetPromptView: View {
                     .foregroundStyle(Color(red: 232/255, green: 232/255, blue: 236/255))
                     .padding(.horizontal, 14)
                     .padding(.vertical, 8)
-                    .background(Color(red: 44/255, green: 44/255, blue: 46/255))
+                    .background(Color.white.opacity(0.08))
                     .clipShape(Capsule())
                     .overlay(
                         Capsule()
-                            .stroke(Color(red: 58/255, green: 58/255, blue: 60/255), lineWidth: 0.5)
+                            .stroke(Color.white.opacity(0.14), lineWidth: 0.5)
                     )
                     .onSubmit { sendCustomPrompt() }
 
@@ -194,11 +194,11 @@ struct PresetPromptView: View {
                         .foregroundStyle(Color(red: 152/255, green: 152/255, blue: 157/255))
                         .frame(height: 28)
                         .padding(.horizontal, 12)
-                        .background(Color(red: 44/255, green: 44/255, blue: 46/255))
+                        .background(Color.white.opacity(0.08))
                         .clipShape(Capsule())
                         .overlay(
                             Capsule()
-                                .stroke(Color(red: 58/255, green: 58/255, blue: 60/255), lineWidth: 0.5)
+                                .stroke(Color.white.opacity(0.14), lineWidth: 0.5)
                         )
                 }
                 .buttonStyle(.plain)
@@ -222,11 +222,11 @@ struct PresetPromptView: View {
                                 .foregroundStyle(Color(red: 152/255, green: 152/255, blue: 157/255))
                                 .frame(height: 28)
                                 .padding(.horizontal, 12)
-                                .background(Color(red: 44/255, green: 44/255, blue: 46/255))
+                                .background(Color.white.opacity(0.08))
                                 .clipShape(Capsule())
                                 .overlay(
                                     Capsule()
-                                        .stroke(Color(red: 58/255, green: 58/255, blue: 60/255), lineWidth: 0.5)
+                                        .stroke(Color.white.opacity(0.14), lineWidth: 0.5)
                                 )
                         }
                         .buttonStyle(.plain)

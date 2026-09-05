@@ -22,12 +22,12 @@ struct PanelPinButton: View {
                 .background(
                     pinState == .pinned
                         ? Color(red: 100/255, green: 210/255, blue: 255/255).opacity(0.1)
-                        : Color(red: 44/255, green: 44/255, blue: 46/255)
+                        : Color.white.opacity(0.08)
                 )
                 .clipShape(Capsule())
                 .overlay(
                     Capsule()
-                        .stroke(Color(red: 58/255, green: 58/255, blue: 60/255), lineWidth: 0.5)
+                        .stroke(Color.white.opacity(0.14), lineWidth: 0.5)
                 )
         }
         .buttonStyle(.plain)
