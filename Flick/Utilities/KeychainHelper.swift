@@ -7,7 +7,7 @@ import Foundation
 import Security
 
 enum KeychainHelper {
-    private static let service = "com.hyx.ai-assistant"
+    private static let service = "com.higenglele.Omii"
 
     static func save(key: String, value: String) {
         guard let data = value.data(using: .utf8) else { return }

@@ -98,7 +98,7 @@ class AIService: ObservableObject {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-        print("[Flick] Chat request: reasoning=\(enableReasoning), model=\(model)")
+        print("[Omii] Chat request: reasoning=\(enableReasoning), model=\(model)")
 
         var messages: [[String: String]] = []
         if !systemPrompt.isEmpty {

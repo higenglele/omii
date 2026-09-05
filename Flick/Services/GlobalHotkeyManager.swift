@@ -52,10 +52,10 @@ class GlobalHotkeyManager {
         )
 
         guard status == noErr else {
-            print("[Flick] InstallEventHandler failed: \(status)")
+            print("[Omii] InstallEventHandler failed: \(status)")
             return
         }
-        print("[Flick] Event handler installed successfully")
+        print("[Omii] Event handler installed successfully")
 
         // 2. Register the hotkey: Command + E
         let hotkeyID = EventHotKeyID(signature: OSType(0x48595831), id: 1)
@@ -70,9 +70,9 @@ class GlobalHotkeyManager {
         )
 
         if status == noErr {
-            print("[Flick] Hotkey ⌘E registered successfully")
+            print("[Omii] Hotkey ⌘E registered successfully")
         } else {
-            print("[Flick] RegisterEventHotKey failed: \(status)")
+            print("[Omii] RegisterEventHotKey failed: \(status)")
         }
     }
 

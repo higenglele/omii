@@ -29,7 +29,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let menu = NSMenu()
         menu.addItem(NSMenuItem(title: "设置...", action: #selector(openSettings), keyEquivalent: ","))
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: "退出 Flick", action: #selector(quitApp), keyEquivalent: "q"))
+        menu.addItem(NSMenuItem(title: "退出 Omii", action: #selector(quitApp), keyEquivalent: "q"))
         statusItem.menu = menu
     }
 
@@ -60,7 +60,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 backing: .buffered,
                 defer: false
             )
-            window.title = "Flick 设置"
+            window.title = "Omii 设置"
             window.contentView = NSHostingView(rootView: SettingsView())
             window.center()
             window.isReleasedWhenClosed = false

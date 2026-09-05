@@ -1,6 +1,6 @@
 ---
 name: Bug 报告
-about: 报告 Flick 的异常行为
+about: 报告 Omii 的异常行为
 title: ''
 labels: bug
 assignees: ''
@@ -11,7 +11,7 @@ assignees: ''
 清晰简洁地描述问题。
 
 **复现步骤**
-1. 打开 Flick
+1. 打开 Omii
 2. 选中文本并按 ⌘E
 3. …
 
@@ -23,7 +23,7 @@ assignees: ''
 
 **环境**
 - macOS 版本：
-- Flick 版本（Git commit 或 Release tag）：
+- Omii 版本（Git commit 或 Release tag）：
 - API 服务商（OpenAI / OpenRouter / 其他）：
 
 **其他信息**

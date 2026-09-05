@@ -246,7 +246,7 @@ struct SettingsView: View {
         let baseURL = settings.apiBaseURL
         let apiKey = settings.apiKey
         let normalizedURL = AIService.normalizedBaseURL(baseURL)
-        print("[Flick] Fetching models from: \(normalizedURL)/models")
+        print("[Omii] Fetching models from: \(normalizedURL)/models")
 
         fetchModelsTask = Task {
             do {
@@ -255,7 +255,7 @@ struct SettingsView: View {
                     apiKey: apiKey
                 )
                 guard !Task.isCancelled else { return }
-                print("[Flick] Fetched \(models.count) models")
+                print("[Omii] Fetched \(models.count) models")
                 await MainActor.run {
                     guard currentGeneration == fetchGeneration else { return }
                     availableModels = settings.orderedModels(from: models)
@@ -266,7 +266,7 @@ struct SettingsView: View {
                 }
             } catch {
                 guard !Task.isCancelled else { return }
-                print("[Flick] Fetch models error: \(error)")
+                print("[Omii] Fetch models error: \(error)")
                 await MainActor.run {
                     guard currentGeneration == fetchGeneration else { return }
                     fetchError = error.localizedDescription

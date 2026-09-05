@@ -1,6 +1,6 @@
 ---
 name: 功能建议
-about: 为 Flick 提出新想法
+about: 为 Omii 提出新想法
 title: ''
 labels: enhancement
 assignees: ''
